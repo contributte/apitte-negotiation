@@ -1,11 +1,11 @@
 <?php
 
-namespace Apitte\Core\Middlewares\Negotiation;
+namespace Apitte\Negotiation;
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Core\Http\ApiRequest;
-use Apitte\Core\Http\ApiResponse;
-use Apitte\Core\Middlewares\Transformer\ITransformer;
+use Apitte\Negotiation\Transformer\ITransformer;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 {
@@ -57,11 +57,11 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	 */
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiRequest
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ServerRequestInterface
 	 */
-	public function negotiateRequest(ApiRequest $request, ApiResponse $response)
+	public function negotiateRequest(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
@@ -81,13 +81,18 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 				// Strip suffix from URL
 				$newPath = substr($path, 0, strlen($path) - strlen($suffix));
 
-				// Update ApiRequest without suffix (.json, ...) and also fill
-				// request attribute
+				// Update ApiRequest without suffix (.json, ...)
+				// and also fill request attribute
 				$request = $request
 					->withUri($request->getUri()->withPath($newPath))
 					->withAttribute(self::ATTR_SUFFIX, $suffix);
 
-				// @todo handle incomming request
+				// Try to transform current request body
+				// only in POST/PUT method
+				if (in_array($request->getMethod(), ['POST', 'PUT'])) {
+					($transformed = $this->transformIn($transformer, $request, $response));
+					$request = $transformed ?: $request;
+				}
 
 				return $request;
 			}
@@ -97,11 +102,11 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
-	public function negotiateResponse(ApiRequest $request, ApiResponse $response)
+	public function negotiateResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
@@ -137,22 +142,22 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 
 	/**
 	 * @param ITransformer $transformer
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
-	protected function transformOut(ITransformer $transformer, ApiRequest $request, ApiResponse $response)
+	protected function transformOut(ITransformer $transformer, ServerRequestInterface $request, ResponseInterface $response)
 	{
 		return $transformer->encode($response);
 	}
 
 	/**
 	 * @param ITransformer $transformer
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiRequest
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ServerRequestInterface
 	 */
-	protected function transformIn(ITransformer $transformer, ApiRequest $request, ApiResponse $response)
+	protected function transformIn(ITransformer $transformer, ServerRequestInterface $request, ResponseInterface $response)
 	{
 		return $transformer->decode($request);
 	}

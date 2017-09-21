@@ -1,9 +1,9 @@
 <?php
 
-namespace Apitte\Core\Middlewares\Transformer;
+namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Core\Http\ApiRequest;
-use Apitte\Core\Http\ApiResponse;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 interface ITransformer
 {
@@ -11,19 +11,19 @@ interface ITransformer
 	/**
 	 * Parse given data from request
 	 *
-	 * @param ApiRequest $request
+	 * @param ServerRequestInterface $request
 	 * @param array $options
-	 * @return ApiRequest
+	 * @return ServerRequestInterface
 	 */
-	public function decode(ApiRequest $request, array $options = []);
+	public function decode(ServerRequestInterface $request, array $options = []);
 
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiResponse $response
+	 * @param ResponseInterface $response
 	 * @param array $options
-	 * @return ApiResponse
+	 * @return ResponseInterface
 	 */
-	public function encode(ApiResponse $response, array $options = []);
+	public function encode(ResponseInterface $response, array $options = []);
 
 }

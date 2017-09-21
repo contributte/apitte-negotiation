@@ -2,13 +2,13 @@
 
 namespace Apitte\Negotiation\Transformer;
 
+use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\Http\ArrayStream;
 use Nette\Utils\Json;
-use Nette\Utils\JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class JsonTransformer extends AbstractTransformer
+class CsvTransformer extends AbstractTransformer
 {
 
 	/**
@@ -45,14 +45,8 @@ class JsonTransformer extends AbstractTransformer
 	 */
 	public function decode(ServerRequestInterface $request, array $options = [])
 	{
-		try {
-			// Try to decode pure JSON in body and set to parse body
-			$body = clone $request->getBody();
-			$request = $request->withParsedBody(Json::decode((string) $body->getContents()));
-		} catch (JsonException $e) {
-		}
-
-		return $request;
+		$stop();
+		dump($request);
 	}
 
 }

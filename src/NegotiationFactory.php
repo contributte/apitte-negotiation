@@ -1,12 +1,14 @@
 <?php
 
-namespace Apitte\Core\Middlewares\Negotiation;
+namespace Apitte\Negotiation;
+
+use Apitte\Negotiation\Transformer\ITransformer;
 
 class NegotiationFactory
 {
 
 	/**
-	 * @param array $transformers
+	 * @param ITransformer[] $transformers
 	 * @return SuffixNegotiator
 	 */
 	public static function bySuffix(array $transformers)

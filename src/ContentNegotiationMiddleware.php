@@ -1,14 +1,13 @@
 <?php
 
-namespace Apitte\Core\Middlewares;
+namespace Apitte\Negotiation;
 
-use Apitte\Core\Http\ApiRequest;
-use Apitte\Core\Http\ApiResponse;
-use Apitte\Core\Middlewares\Negotiation\IRequestNegotiator;
-use Apitte\Core\Middlewares\Negotiation\IResponseNegotiator;
+use Apitte\Negotiation\Http\ArrayStream;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
-class ContentNegotiation
+class ContentNegotiationMiddleware
 {
 
 	// Attributes in ServerRequestInterface
@@ -120,12 +119,12 @@ class ContentNegotiation
 	 */
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
 	 * @param callable $next
-	 * @return ApiResponse
+	 * @return ResponseInterface
 	 */
-	public function __invoke(ApiRequest $request, ApiResponse $response, callable $next)
+	public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
 	{
 		// Should we skip negotiation?
 		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) {
@@ -158,11 +157,11 @@ class ContentNegotiation
 	 */
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiRequest
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ServerRequestInterface
 	 */
-	protected function negotiateRequest(ApiRequest $request, ApiResponse $response)
+	protected function negotiateRequest(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		// Early return in case of no negotiators
 		if (!$this->requestNegotiators) return $request;
@@ -179,11 +178,11 @@ class ContentNegotiation
 	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
-	protected function negotiateResponse(ApiRequest $request, ApiResponse $response)
+	protected function negotiateResponse(ServerRequestInterface $request, ResponseInterface $response)
 	{
 		// Early return in case of no negotiators
 		if (!$this->responseNegotiators) return $response;
@@ -201,18 +200,21 @@ class ContentNegotiation
 
 	/**
 	 * @param Exception $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
+	 * @param ServerRequestInterface $request
+	 * @param ResponseInterface $response
+	 * @return ResponseInterface
 	 */
-	protected function negotiateException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function negotiateException(Exception $exception, ServerRequestInterface $request, ResponseInterface $response)
 	{
 		$code = $exception->getCode();
 
-		return $response->withData([
-			'error' => $exception->getMessage(),
-			'code' => $exception->getCode(),
-		])->withStatus($code < 200 || $code > 504 ? 404 : $code);
+		return $response->withBody(
+			ArrayStream::from($response)
+				->with([
+					'error' => $exception->getMessage(),
+					'code' => $exception->getCode(),
+				])
+		)->withStatus($code < 200 || $code > 504 ? 404 : $code);
 	}
 
 }
