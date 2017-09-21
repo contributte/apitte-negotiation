@@ -48,8 +48,9 @@ class JsonTransformer extends AbstractTransformer
 		try {
 			// Try to decode pure JSON in body and set to parse body
 			$body = clone $request->getBody();
-			$request = $request->withParsedBody(Json::decode((string) $body->getContents()));
+			$request = $request->withParsedBody(Json::decode((string) $body->getContents(), JSON_OBJECT_AS_ARRAY));
 		} catch (JsonException $e) {
+			// Just catch exception
 		}
 
 		return $request;

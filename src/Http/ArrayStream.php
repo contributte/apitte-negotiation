@@ -2,6 +2,7 @@
 
 namespace Apitte\Negotiation\Http;
 
+use Contributte\Psr7\NullStream;
 use Psr\Http\Message\ResponseInterface;
 
 class ArrayStream extends NullStream

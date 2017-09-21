@@ -55,6 +55,8 @@ class NegotiationPlugin extends AbstractPlugin
 
 	/**
 	 * Decorate services
+	 *
+	 * @return void
 	 */
 	public function beforePluginCompile()
 	{
