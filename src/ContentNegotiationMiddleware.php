@@ -11,9 +11,9 @@ class ContentNegotiationMiddleware
 {
 
 	// Attributes in ServerRequestInterface
-	const ATTR_SKIP = 'C-Negotiation-Skip';
-	const ATTR_SKIP_REQUEST = 'C-Negotiation-Skip-Request';
-	const ATTR_SKIP_RESPONSE = 'C-Negotiation-Skip-Response';
+	const ATTR_SKIP = 'apitte.negotiation.skip';
+	const ATTR_SKIP_REQUEST = 'apitte.negotiation.skip.request';
+	const ATTR_SKIP_RESPONSE = 'apitte.negotiation.skip.response';
 
 	/** @var IRequestNegotiator[] */
 	protected $requestNegotiators = [];
