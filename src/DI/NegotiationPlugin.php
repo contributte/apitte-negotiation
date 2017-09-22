@@ -18,7 +18,7 @@ class NegotiationPlugin extends AbstractPlugin
 	const PLUGIN_NAME = 'negotiation';
 
 	/** @var array */
-	private $defaults = [
+	protected $defaults = [
 		'unification' => FALSE,
 	];
 
@@ -29,17 +29,6 @@ class NegotiationPlugin extends AbstractPlugin
 	{
 		parent::__construct($compiler);
 		$this->name = self::PLUGIN_NAME;
-	}
-
-	/**
-	 * Process and validate config
-	 *
-	 * @param array $config
-	 * @return void
-	 */
-	public function setupPlugin(array $config = [])
-	{
-		$this->setupConfig($this->defaults, $config);
 	}
 
 	/**
