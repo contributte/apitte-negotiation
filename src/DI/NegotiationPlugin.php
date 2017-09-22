@@ -7,6 +7,7 @@ use Apitte\Core\DI\Plugin\AbstractPlugin;
 use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiationMiddleware;
+use Apitte\Negotiation\ContentUnificationMiddleware;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Contributte\Middlewares\DI\MiddlewaresExtension;
@@ -15,6 +16,11 @@ class NegotiationPlugin extends AbstractPlugin
 {
 
 	const PLUGIN_NAME = 'negotiation';
+
+	/** @var array */
+	private $defaults = [
+		'unification' => FALSE,
+	];
 
 	/**
 	 * @param PluginCompiler $compiler
@@ -26,6 +32,17 @@ class NegotiationPlugin extends AbstractPlugin
 	}
 
 	/**
+	 * Process and validate config
+	 *
+	 * @param array $config
+	 * @return void
+	 */
+	public function setupPlugin(array $config = [])
+	{
+		$this->setupConfig($this->defaults, $config);
+	}
+
+	/**
 	 * Register services
 	 *
 	 * @return void
@@ -33,6 +50,7 @@ class NegotiationPlugin extends AbstractPlugin
 	public function loadPluginConfiguration()
 	{
 		$builder = $this->getContainerBuilder();
+		$config = $this->getConfig();
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
@@ -51,6 +69,12 @@ class NegotiationPlugin extends AbstractPlugin
 		$builder->addDefinition($this->prefix('negotiator.suffix'))
 			->setFactory(SuffixNegotiator::class)
 			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 100]);
+
+		if ($config['unification'] === TRUE) {
+			$builder->addDefinition($this->prefix('unification'))
+				->setFactory(ContentUnificationMiddleware::class)
+				->addTag(MiddlewaresExtension::MIDDLEWARE_TAG, ['priority' => 460]);
+		}
 	}
 
 	/**
