@@ -2,25 +2,11 @@
 
 namespace Apitte\Negotiation\Http;
 
-use Contributte\Psr7\NullStream;
-use Psr\Http\Message\ResponseInterface;
-
-class ArrayStream extends NullStream
+class ArrayStream extends DataStream
 {
 
 	/** @var array */
 	private $content = [];
-
-	/** @var ResponseInterface */
-	private $original;
-
-	/**
-	 * @param array $content
-	 */
-	private function __construct(array $content = [])
-	{
-		$this->content = $content;
-	}
 
 	/**
 	 * @return array
@@ -39,30 +25,6 @@ class ArrayStream extends NullStream
 		$this->content = $content;
 
 		return $this;
-	}
-
-	/**
-	 * @return ResponseInterface
-	 */
-	public function getOriginal()
-	{
-		return $this->original;
-	}
-
-	/**
-	 * FACTORIES ***************************************************************
-	 */
-
-	/**
-	 * @param ResponseInterface $response
-	 * @return static
-	 */
-	public static function from(ResponseInterface $response)
-	{
-		$stream = new static([]);
-		$stream->original = $response;
-
-		return $stream;
 	}
 
 }
