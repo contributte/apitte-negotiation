@@ -113,7 +113,7 @@ class NegotiationPlugin extends AbstractPlugin
 		}, array_keys($definitions));
 
 		// Set services as argument
-		$negotiation->getFactory()->arguments = [$negotiators];
+		$negotiation->setArguments([$negotiators]);
 	}
 
 	/**
@@ -147,7 +147,7 @@ class NegotiationPlugin extends AbstractPlugin
 		$negotiator = $builder->getDefinition($this->prefix('negotiator.suffix'));
 
 		// Set services as argument
-		$negotiator->getFactory()->arguments = [$suffixTransformers];
+		$negotiator->setArguments([$suffixTransformers]);
 	}
 
 }
