@@ -14,7 +14,7 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	const FALLBACK = '*';
 
 	// Attributes in ServerRequestInterface
-	const ATTR_SUFFIX = 'C-Negotiation-Suffix';
+	const ATTR_SUFFIX = 'apitte.negotiation.suffix';
 
 	/** @var ITransformer[] */
 	private $transformers = [];
