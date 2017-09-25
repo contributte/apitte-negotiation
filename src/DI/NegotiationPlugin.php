@@ -9,6 +9,7 @@ use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiationMiddleware;
 use Apitte\Negotiation\ContentUnificationMiddleware;
 use Apitte\Negotiation\SuffixNegotiator;
+use Apitte\Negotiation\Transformer\CsvTransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Contributte\Middlewares\DI\MiddlewaresExtension;
 
@@ -49,6 +50,11 @@ class NegotiationPlugin extends AbstractPlugin
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
+			->setAutowired(FALSE);
+
+		$builder->addDefinition($this->prefix('transformer.csv'))
+			->setFactory(CsvTransformer::class)
+			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(FALSE);
 
 		$builder->addDefinition($this->prefix('negotiation'))
