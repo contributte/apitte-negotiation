@@ -4,7 +4,6 @@ namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Core\Exception\Logical\InvalidArgumentException;
 use Apitte\Mapping\Http\ApiResponse;
-use Apitte\Negotiation\Http\CsvEntity;
 
 class CsvTransformer extends AbstractTransformer
 {
@@ -19,18 +18,14 @@ class CsvTransformer extends AbstractTransformer
 	public function encode(ApiResponse $response, array $options = [])
 	{
 		// Return immediately if response is not accepted
-		if (!($response->getBody() instanceof CsvEntity))
-			return $response;
+		if (!$this->acceptResponse($response)) return $response;
 
-		/** @var CsvEntity $body */
-		$body = $response->getBody();
-		$originBody = $body->getOriginal()->getBody();
-		$csv = $this->convert($body->getData());
-		$originBody->write($csv);
+		// Convert data to array to CSV
+		$content = $this->convert($response->getEntity()->toArray());
+		$response->getBody()->write($content);
 
 		// Setup content type
 		$response = $response
-			->withBody($originBody)
 			->withHeader('Content-Type', 'text/csv');
 
 		return $response;

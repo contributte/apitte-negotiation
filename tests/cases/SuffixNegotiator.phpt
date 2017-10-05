@@ -7,6 +7,8 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Contributte\Psr7\Psr7ResponseFactory;
@@ -17,7 +19,10 @@ use Tester\Assert;
 test(function () {
 	Assert::exception(function () {
 		$negotiation = new SuffixNegotiator([]);
-		$negotiation->negotiateResponse(Psr7ServerRequestFactory::fromSuperGlobal(), Psr7ResponseFactory::fromGlobal());
+		$negotiation->negotiateResponse(
+			new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()),
+			new ApiResponse(Psr7ResponseFactory::fromGlobal())
+		);
 	}, InvalidStateException::class, 'Please add at least one transformer');
 });
 
@@ -25,8 +30,8 @@ test(function () {
 test(function () {
 	$negotiation = new SuffixNegotiator(['.json' => new JsonTransformer()]);
 
-	$request = Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org');
-	$response = Psr7ResponseFactory::fromGlobal();
+	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org'));
+	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 
 	// 1# Negotiate request (same object as given);
 	Assert::same($request, $negotiation->negotiateRequest($request, $response));
@@ -39,8 +44,8 @@ test(function () {
 test(function () {
 	$negotiation = new SuffixNegotiator(['.json' => new JsonTransformer()]);
 
-	$request = Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.json');
-	$response = Psr7ResponseFactory::fromGlobal();
+	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.json'));
+	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->writeJsonBody(['foo' => 'bar']);
 
 	// 1# Negotiate request
@@ -55,8 +60,8 @@ test(function () {
 test(function () {
 	$negotiation = new SuffixNegotiator(['*' => new JsonTransformer()]);
 
-	$request = Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.bar');
-	$response = Psr7ResponseFactory::fromGlobal();
+	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.bar'));
+	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->writeJsonBody(['foo' => 'bar']);
 
 	// 1# Negotiate request
