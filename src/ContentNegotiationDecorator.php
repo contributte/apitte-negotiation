@@ -16,11 +16,11 @@ class ContentNegotiationDecorator implements IRequestDecorator, IResponseDecorat
 	private $contentNegotiation;
 
 	/**
-	 * @param ContentNegotiation $cn
+	 * @param ContentNegotiation $contentNegotiation
 	 */
-	public function __construct(ContentNegotiation $cn)
+	public function __construct(ContentNegotiation $contentNegotiation)
 	{
-		$this->contentNegotiation = $cn;
+		$this->contentNegotiation = $contentNegotiation;
 	}
 
 	/**
@@ -53,4 +53,5 @@ class ContentNegotiationDecorator implements IRequestDecorator, IResponseDecorat
 	{
 		return $this->contentNegotiation->negotiateException($exception, $request, $response);
 	}
+
 }

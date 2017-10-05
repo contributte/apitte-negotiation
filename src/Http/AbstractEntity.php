@@ -26,6 +26,7 @@ abstract class AbstractEntity
 
 	/**
 	 * @param mixed $data
+	 * @return void
 	 */
 	public function withData($data)
 	{

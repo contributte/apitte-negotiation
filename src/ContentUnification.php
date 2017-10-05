@@ -44,9 +44,9 @@ class ContentUnification
 	}
 
 	/**
+	 * @param Exception $exception
 	 * @param ApiRequest $request
 	 * @param ApiResponse $response
-	 * @param Exception $exception
 	 * @return ApiResponse
 	 */
 	public function unifyException(Exception $exception, ApiRequest $request, ApiResponse $response)
