@@ -2,8 +2,8 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 
 interface ITransformer
 {
@@ -11,19 +11,19 @@ interface ITransformer
 	/**
 	 * Parse given data from request
 	 *
-	 * @param ServerRequestInterface $request
+	 * @param ApiRequest $request
 	 * @param array $options
-	 * @return ServerRequestInterface
+	 * @return ApiRequest
 	 */
-	public function decode(ServerRequestInterface $request, array $options = []);
+	public function decode(ApiRequest $request, array $options = []);
 
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ResponseInterface $response
+	 * @param ApiResponse $response
 	 * @param array $options
-	 * @return ResponseInterface
+	 * @return ApiResponse
 	 */
-	public function encode(ResponseInterface $response, array $options = []);
+	public function encode(ApiResponse $response, array $options = []);
 
 }

@@ -3,15 +3,17 @@
 namespace Apitte\Negotiation\DI;
 
 use Apitte\Core\DI\ApiExtension;
+use Apitte\Core\DI\Helpers;
 use Apitte\Core\DI\Plugin\AbstractPlugin;
 use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Negotiation\ContentNegotiationMiddleware;
-use Apitte\Negotiation\ContentUnificationMiddleware;
+use Apitte\Negotiation\ContentNegotiation;
+use Apitte\Negotiation\ContentNegotiationDecorator;
+use Apitte\Negotiation\ContentUnification;
+use Apitte\Negotiation\ContentUnificationDecorator;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
-use Contributte\Middlewares\DI\MiddlewaresExtension;
 
 class NegotiationPlugin extends AbstractPlugin
 {
@@ -58,8 +60,11 @@ class NegotiationPlugin extends AbstractPlugin
 			->setAutowired(FALSE);
 
 		$builder->addDefinition($this->prefix('negotiation'))
-			->setFactory(ContentNegotiationMiddleware::class)
-			->addTag(MiddlewaresExtension::MIDDLEWARE_TAG, ['priority' => 450]);
+			->setFactory(ContentNegotiation::class);
+
+		$builder->addDefinition($this->prefix('negotiation.decorator'))
+			->setFactory(ContentNegotiationDecorator::class)
+			->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 100]);
 
 		$builder->addDefinition($this->prefix('negotiator.suffix'))
 			->setFactory(SuffixNegotiator::class)
@@ -67,8 +72,11 @@ class NegotiationPlugin extends AbstractPlugin
 
 		if ($config['unification'] === TRUE) {
 			$builder->addDefinition($this->prefix('unification'))
-				->setFactory(ContentUnificationMiddleware::class)
-				->addTag(MiddlewaresExtension::MIDDLEWARE_TAG, ['priority' => 460]);
+				->setFactory(ContentUnification::class);
+
+			$builder->addDefinition($this->prefix('unification.decorator'))
+				->setFactory(ContentUnificationDecorator::class)
+				->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 500]);
 		}
 	}
 
@@ -99,24 +107,13 @@ class NegotiationPlugin extends AbstractPlugin
 		}
 
 		// Sort by priority
-		uasort($definitions, function ($a, $b) {
-			$p1 = isset($a['priority']) ? $a['priority'] : 10;
-			$p2 = isset($b['priority']) ? $b['priority'] : 10;
+		$definitions = Helpers::sort($definitions);
 
-			if ($p1 == $p2) {
-				return 0;
-			}
-
-			return ($p1 < $p2) ? -1 : 1;
-		});
+		// Find all services by names
+		$negotiators = Helpers::getDefinitions($definitions, $builder);
 
 		// Obtain negotiation
 		$negotiation = $builder->getDefinition($this->prefix('negotiation'));
-
-		// Find all services by names
-		$negotiators = array_map(function ($name) use ($builder) {
-			return $builder->getDefinition($name);
-		}, array_keys($definitions));
 
 		// Set services as argument
 		$negotiation->setArguments([$negotiators]);

@@ -2,11 +2,10 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Negotiation\Http\ArrayStream;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 class JsonTransformer extends AbstractTransformer
 {
@@ -14,23 +13,21 @@ class JsonTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ResponseInterface $response
+	 * @param ApiResponse $response
 	 * @param array $options
-	 * @return ResponseInterface
+	 * @return ApiResponse
 	 */
-	public function encode(ResponseInterface $response, array $options = [])
+	public function encode(ApiResponse $response, array $options = [])
 	{
 		// Return immediately if response is not accepted
 		if (!$this->acceptResponse($response)) return $response;
 
-		/** @var ArrayStream $body */
-		$body = $response->getBody();
-		$originBody = $body->getOriginal()->getBody();
-		$originBody->write(Json::encode($body->getData()));
+		// Convert data to array to json
+		$content = Json::encode($response->getEntity()->toArray());
+		$response->getBody()->write($content);
 
 		// Setup content type
 		$response = $response
-			->withBody($originBody)
 			->withHeader('Content-Type', 'application/json');
 
 		return $response;
@@ -39,11 +36,11 @@ class JsonTransformer extends AbstractTransformer
 	/**
 	 * Parse given data from request
 	 *
-	 * @param ServerRequestInterface $request
+	 * @param ApiRequest $request
 	 * @param array $options
-	 * @return ServerRequestInterface
+	 * @return ApiRequest
 	 */
-	public function decode(ServerRequestInterface $request, array $options = [])
+	public function decode(ApiRequest $request, array $options = [])
 	{
 		try {
 			// Try to decode pure JSON in body and set to parse body

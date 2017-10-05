@@ -2,17 +2,17 @@
 
 namespace Apitte\Negotiation;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 
 interface IResponseNegotiator
 {
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface|NULL
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse|NULL
 	 */
-	public function negotiateResponse(ServerRequestInterface $request, ResponseInterface $response);
+	public function negotiateResponse(ApiRequest $request, ApiResponse $response);
 
 }

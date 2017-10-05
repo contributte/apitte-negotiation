@@ -2,7 +2,7 @@
 
 namespace Apitte\Negotiation\Http;
 
-class CsvStream extends ArrayStream
+class CsvEntity extends AbstractEntity
 {
 
 	/** @var string[] */
@@ -40,7 +40,7 @@ class CsvStream extends ArrayStream
 	 */
 	private function update()
 	{
-		$this->with(empty($this->header) ? $this->rows : array_merge([$this->header], $this->rows));
+		$this->withData(empty($this->header) ? $this->rows : array_merge([$this->header], $this->rows));
 	}
 
 }

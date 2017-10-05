@@ -3,9 +3,9 @@
 namespace Apitte\Negotiation;
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 use Apitte\Negotiation\Transformer\ITransformer;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 {
@@ -13,7 +13,7 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	// Masks
 	const FALLBACK = '*';
 
-	// Attributes in ServerRequestInterface
+	// Attributes in ApiRequest
 	const ATTR_SUFFIX = 'apitte.negotiation.suffix';
 
 	/** @var ITransformer[] */
@@ -57,11 +57,11 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	 */
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ServerRequestInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiRequest
 	 */
-	public function negotiateRequest(ServerRequestInterface $request, ResponseInterface $response)
+	public function negotiateRequest(ApiRequest $request, ApiResponse $response)
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
@@ -102,11 +102,11 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 	}
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
 	 */
-	public function negotiateResponse(ServerRequestInterface $request, ResponseInterface $response)
+	public function negotiateResponse(ApiRequest $request, ApiResponse $response)
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
@@ -142,22 +142,22 @@ class SuffixNegotiator implements IResponseNegotiator, IRequestNegotiator
 
 	/**
 	 * @param ITransformer $transformer
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
 	 */
-	protected function transformOut(ITransformer $transformer, ServerRequestInterface $request, ResponseInterface $response)
+	protected function transformOut(ITransformer $transformer, ApiRequest $request, ApiResponse $response)
 	{
 		return $transformer->encode($response);
 	}
 
 	/**
 	 * @param ITransformer $transformer
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ServerRequestInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiRequest
 	 */
-	protected function transformIn(ITransformer $transformer, ServerRequestInterface $request, ResponseInterface $response)
+	protected function transformIn(ITransformer $transformer, ApiRequest $request, ApiResponse $response)
 	{
 		return $transformer->decode($request);
 	}

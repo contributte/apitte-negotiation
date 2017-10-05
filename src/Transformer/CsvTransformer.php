@@ -3,9 +3,8 @@
 namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Core\Exception\Logical\InvalidArgumentException;
-use Apitte\Negotiation\Http\CsvStream;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Negotiation\Http\CsvEntity;
 
 class CsvTransformer extends AbstractTransformer
 {
@@ -13,17 +12,17 @@ class CsvTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ResponseInterface $response
+	 * @param ApiResponse $response
 	 * @param array $options
-	 * @return ResponseInterface
+	 * @return ApiResponse
 	 */
-	public function encode(ResponseInterface $response, array $options = [])
+	public function encode(ApiResponse $response, array $options = [])
 	{
 		// Return immediately if response is not accepted
-		if (!($response->getBody() instanceof CsvStream))
+		if (!($response->getBody() instanceof CsvEntity))
 			return $response;
 
-		/** @var CsvStream $body */
+		/** @var CsvEntity $body */
 		$body = $response->getBody();
 		$originBody = $body->getOriginal()->getBody();
 		$csv = $this->convert($body->getData());
@@ -35,18 +34,6 @@ class CsvTransformer extends AbstractTransformer
 			->withHeader('Content-Type', 'text/csv');
 
 		return $response;
-	}
-
-	/**
-	 * Parse given data from request
-	 *
-	 * @param ServerRequestInterface $request
-	 * @param array $options
-	 * @return NULL
-	 */
-	public function decode(ServerRequestInterface $request, array $options = [])
-	{
-		return NULL;
 	}
 
 	/**
@@ -69,6 +56,7 @@ class CsvTransformer extends AbstractTransformer
 		rewind($fp);
 		$data = fread($fp, 1048576);
 		fclose($fp);
+
 		return rtrim($data, "\n");
 	}
 

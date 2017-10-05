@@ -2,18 +2,20 @@
 
 namespace Apitte\Negotiation;
 
-use Apitte\Negotiation\Http\ArrayStream;
+use Apitte\Core\Exception\Logical\InvalidStateException;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Negotiation\Http\ArrayEntity;
 use Exception;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
-class ContentNegotiationMiddleware
+class ContentNegotiation
 {
 
-	// Attributes in ServerRequestInterface
+	// Attributes in ApiRequest
 	const ATTR_SKIP = 'apitte.negotiation.skip';
 	const ATTR_SKIP_REQUEST = 'apitte.negotiation.skip.request';
 	const ATTR_SKIP_RESPONSE = 'apitte.negotiation.skip.response';
+	const ATTR_SKIP_EXCEPTION = 'apitte.negotiation.skip.exception';
 
 	/** @var IRequestNegotiator[] */
 	protected $requestNegotiators = [];
@@ -115,56 +117,24 @@ class ContentNegotiationMiddleware
 	}
 
 	/**
-	 * API - INVOKING **********************************************************
+	 * API *********************************************************************
 	 */
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param callable $next
-	 * @return ResponseInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiRequest
 	 */
-	public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
+	public function negotiateRequest(ApiRequest $request, ApiResponse $response)
 	{
 		// Should we skip negotiation?
-		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) {
-			return $next($request, $response);
+		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) return $request;
+		if ($request->getAttribute(self::ATTR_SKIP_REQUEST, FALSE) === TRUE) return $request;
+
+		// Validation
+		if (!$this->requestNegotiators) {
+			throw new InvalidStateException('At least one request negotiator is required');
 		}
-
-		// 1) Request negotiation
-		if ($request->getAttribute(self::ATTR_SKIP_REQUEST, FALSE) !== TRUE) {
-			$request = $this->negotiateRequest($request, $response);
-		}
-
-		// 2) Pass to next invoker
-		try {
-			$response = $next($request, $response);
-		} catch (Exception $e) {
-			if ($this->catchException === FALSE) throw $e;
-			$response = $this->negotiateException($e, $request, $response);
-		}
-
-		// 3) Response negotiation
-		if ($request->getAttribute(self::ATTR_SKIP_RESPONSE, FALSE) !== TRUE) {
-			$response = $this->negotiateResponse($request, $response);
-		}
-
-		return $response;
-	}
-
-	/**
-	 * NEGOTIATION *************************************************************
-	 */
-
-	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ServerRequestInterface
-	 */
-	protected function negotiateRequest(ServerRequestInterface $request, ResponseInterface $response)
-	{
-		// Early return in case of no negotiators
-		if (!$this->requestNegotiators) return $request;
 
 		foreach ($this->requestNegotiators as $negotiator) {
 			// Pass to negotiator and check return value
@@ -178,14 +148,20 @@ class ContentNegotiationMiddleware
 	}
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
 	 */
-	protected function negotiateResponse(ServerRequestInterface $request, ResponseInterface $response)
+	public function negotiateResponse(ApiRequest $request, ApiResponse $response)
 	{
-		// Early return in case of no negotiators
-		if (!$this->responseNegotiators) return $response;
+		// Should we skip negotiation?
+		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) return $response;
+		if ($request->getAttribute(self::ATTR_SKIP_RESPONSE, FALSE) === TRUE) return $response;
+
+		// Validation
+		if (!$this->responseNegotiators) {
+			throw new InvalidStateException('At least one response negotiator is required');
+		}
 
 		foreach ($this->responseNegotiators as $negotiator) {
 			// Pass to negotiator and check return value
@@ -200,21 +176,27 @@ class ContentNegotiationMiddleware
 
 	/**
 	 * @param Exception $exception
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
 	 */
-	protected function negotiateException(Exception $exception, ServerRequestInterface $request, ResponseInterface $response)
+	public function negotiateException(Exception $exception, ApiRequest $request, ApiResponse $response)
 	{
+		// Should we skip negotiation?
+		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) return $response;
+		if ($request->getAttribute(self::ATTR_SKIP_EXCEPTION, FALSE) === TRUE) return $response;
+
+		if ($this->catchException === FALSE) throw $exception;
+
 		$code = $exception->getCode();
 
-		return $response->withBody(
-			ArrayStream::from($response)
-				->with([
-					'error' => $exception->getMessage(),
-					'code' => $exception->getCode(),
-				])
-		)->withStatus($code < 200 || $code > 504 ? 404 : $code);
+		$response = $response
+			->withEntity(new ArrayEntity([
+				'error' => $exception->getMessage(),
+				'code' => $exception->getCode(),
+			]))->withStatus($code < 200 || $code > 504 ? 404 : $code);
+
+		return $response;
 	}
 
 }

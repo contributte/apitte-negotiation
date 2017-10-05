@@ -6,7 +6,7 @@
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-use Apitte\Negotiation\Http\CsvStream;
+use Apitte\Negotiation\Http\CsvEntity;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Contributte\Psr7\Psr7Response;
 use Contributte\Psr7\Psr7ResponseFactory;
@@ -16,7 +16,7 @@ use Tester\Assert;
 test(function () {
 	$transformer = new CsvTransformer();
 	$response = Psr7ResponseFactory::fromGlobal();
-	$response = $response->withBody(CsvStream::from($response)->withRows([
+	$response = $response->withBody(CsvEntity::from($response)->withRows([
 		['1', '2', '3'],
 		['4', '5', '6'],
 		['7', '8', '9'],

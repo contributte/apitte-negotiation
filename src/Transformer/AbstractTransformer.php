@@ -2,19 +2,39 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Negotiation\Http\ArrayStream;
-use Psr\Http\Message\ResponseInterface;
+use Apitte\Mapping\Http\ApiRequest;
+use Apitte\Mapping\Http\ApiResponse;
 
 abstract class AbstractTransformer implements ITransformer
 {
 
 	/**
-	 * @param ResponseInterface $response
+	 * @param ApiResponse $request
+	 * @param array $options
+	 * @return null
+	 */
+	public function encode(ApiResponse $request, array $options = [])
+	{
+		return NULL;
+	}
+
+	/**
+	 * @param ApiRequest $request
+	 * @param array $options
+	 * @return null
+	 */
+	public function decode(ApiRequest $request, array $options = [])
+	{
+		return NULL;
+	}
+
+	/**
+	 * @param ApiResponse $response
 	 * @return bool
 	 */
-	protected function acceptResponse(ResponseInterface $response)
+	protected function acceptResponse(ApiResponse $response)
 	{
-		return $response->getBody() instanceof ArrayStream;
+		return $response->getEntity() !== NULL;
 	}
 
 }
