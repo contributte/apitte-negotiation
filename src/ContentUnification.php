@@ -79,7 +79,7 @@ class ContentUnification
 		}
 
 		// Skip processing if unified data not provided
-		if (!$response->getBody() instanceof ArrayEntity) return $response;
+		if (!($response->getEntity() instanceof ArrayEntity)) return $response;
 
 		return $response
 			->withEntity(ArrayEntity::from([

@@ -64,7 +64,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 		$builder->addDefinition($this->prefix('negotiation.decorator'))
 			->setFactory(ContentNegotiationDecorator::class)
-			->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 100]);
+			->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 500]);
 
 		$builder->addDefinition($this->prefix('negotiator.suffix'))
 			->setFactory(SuffixNegotiator::class)
@@ -76,7 +76,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 			$builder->addDefinition($this->prefix('unification.decorator'))
 				->setFactory(ContentUnificationDecorator::class)
-				->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 500]);
+				->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 100]);
 		}
 	}
 
