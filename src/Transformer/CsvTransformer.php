@@ -2,7 +2,6 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Core\Exception\Logical\InvalidArgumentException;
 use Apitte\Mapping\Http\ApiResponse;
 
 class CsvTransformer extends AbstractTransformer
@@ -43,7 +42,7 @@ class CsvTransformer extends AbstractTransformer
 		foreach ($rows as $row) {
 			foreach ($row as $item) {
 				if (is_array($item) || !is_scalar($item)) {
-					throw new InvalidArgumentException('CSV need flat array');
+					return 'CSV need flat array';
 				}
 			}
 			fputcsv($fp, $row, $delimiter, $enclosure);
