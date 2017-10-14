@@ -1,7 +1,7 @@
 {
   "name": "apitte/negotiation",
-  "description": "Apitte core library",
-  "keywords": ["api", "rest", "json", "psr7", "middlewares"],
+  "description": "Content-Negotiation support for Apitte stack",
+  "keywords": ["apitte", "negotiation", "content-negotiation", "view-resolver"],
   "type": "library",
   "license": "MIT",
   "homepage": "https://github.com/apitte/negotiation",
