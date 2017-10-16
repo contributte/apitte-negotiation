@@ -186,7 +186,11 @@ class ContentNegotiation
 		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) return $response;
 		if ($request->getAttribute(self::ATTR_SKIP_EXCEPTION, FALSE) === TRUE) return $response;
 
+		// Throw or catch exception?
 		if ($this->catchException === FALSE) throw $exception;
+
+		// Return response if entity is already setup
+		if ($response->getEntity() && $response->getEntity()->getData()) return $response;
 
 		$code = $exception->getCode();
 

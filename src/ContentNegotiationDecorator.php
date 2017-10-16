@@ -51,7 +51,7 @@ class ContentNegotiationDecorator implements IRequestDecorator, IResponseDecorat
 	 */
 	public function decorateException(Exception $exception, ServerRequestInterface $request, ResponseInterface $response)
 	{
-		return $this->contentNegotiation->negotiateException($exception, $request, $response);
+		return $this->decorateResponse($request, $this->contentNegotiation->negotiateException($exception, $request, $response));
 	}
 
 }
