@@ -1,6 +1,6 @@
 <?php
 
-namespace Apitte\Negotiation;
+namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Core\Exception\Api\ClientErrorException;
 use Apitte\Core\Exception\Api\ServerErrorException;
@@ -8,15 +8,10 @@ use Apitte\Mapping\Http\ApiRequest;
 use Apitte\Mapping\Http\ApiResponse;
 use Apitte\Negotiation\Http\ArrayEntity;
 use Exception;
+use Nette\Utils\Json;
 
-/**
- * @see https://labs.omniti.com/labs/jsend
- */
-class ContentUnification
+class JsonUnifyTransformer extends AbstractTransformer
 {
-
-	// Attributes in ApiRequest
-	const ATTR_SKIP_UNIFICATION = 'apitte.negotiation.skip.unification';
 
 	// Status codes
 	const DEFAULT_SUCCESS_CODE = 200;
@@ -29,7 +24,70 @@ class ContentUnification
 	const STATUS_ERROR = 'error';
 
 	/**
-	 * API *********************************************************************
+	 * Encode given data for response
+	 *
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @param array $context
+	 * @return ApiResponse
+	 */
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	{
+		if (isset($context['exception'])) {
+			return $this->transformException($context['exception'], $request, $response);
+		}
+
+		return $this->transformResponse($request, $response);
+	}
+
+	/**
+	 * @param Exception $exception
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
+	 */
+	protected function transformException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	{
+		// Unify response
+		$response = $this->unifyException($exception, $request, $response);
+
+		// Convert data to array to json
+		$content = Json::encode($response->getEntity()->toArray());
+		$response->getBody()->write($content);
+
+		// Setup content type
+		$response = $response
+			->withHeader('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
+	 */
+	protected function transformResponse(ApiRequest $request, ApiResponse $response)
+	{
+		// Return immediately if response is not accepted
+		if (!$this->accept($response)) return $response;
+
+		// Unify response
+		$response = $this->unifyResponse($request, $response);
+
+		// Convert data to array to json
+		$content = Json::encode($response->getEntity()->toArray());
+		$response->getBody()->write($content);
+
+		// Setup content type
+		$response = $response
+			->withHeader('Content-Type', 'application/json');
+
+		return $response;
+	}
+
+	/**
+	 * UNIFICATION *************************************************************
 	 */
 
 	/**
@@ -38,7 +96,7 @@ class ContentUnification
 	 * @param Exception|NULL $exception
 	 * @return ApiResponse
 	 */
-	public function unifyResponse(ApiRequest $request, ApiResponse $response, Exception $exception = NULL)
+	protected function unifyResponse(ApiRequest $request, ApiResponse $response, Exception $exception = NULL)
 	{
 		return $this->processSuccess($request, $response);
 	}
@@ -49,7 +107,7 @@ class ContentUnification
 	 * @param ApiResponse $response
 	 * @return ApiResponse
 	 */
-	public function unifyException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function unifyException(Exception $exception, ApiRequest $request, ApiResponse $response)
 	{
 		if ($exception instanceof ClientErrorException) {
 			return $this->processClientError($exception, $request, $response);
@@ -77,9 +135,6 @@ class ContentUnification
 		if (!$response->getStatusCode()) {
 			$response = $response->withStatus(self::DEFAULT_SUCCESS_CODE);
 		}
-
-		// Skip processing if unified data not provided
-		if (!($response->getEntity() instanceof ArrayEntity)) return $response;
 
 		return $response
 			->withEntity(ArrayEntity::from([

@@ -4,26 +4,18 @@ namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Mapping\Http\ApiRequest;
 use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Mapping\Http\ApiResponse as ApiMappingResponse;
 
 abstract class AbstractTransformer implements ITransformer
 {
 
 	/**
-	 * @param ApiResponse $request
-	 * @param array $options
-	 * @return null
-	 */
-	public function encode(ApiResponse $request, array $options = [])
-	{
-		return NULL;
-	}
-
-	/**
 	 * @param ApiRequest $request
-	 * @param array $options
+	 * @param ApiResponse $response
+	 * @param array $context
 	 * @return null
 	 */
-	public function decode(ApiRequest $request, array $options = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
 		return NULL;
 	}
@@ -32,8 +24,10 @@ abstract class AbstractTransformer implements ITransformer
 	 * @param ApiResponse $response
 	 * @return bool
 	 */
-	protected function acceptResponse(ApiResponse $response)
+	protected function accept(ApiResponse $response)
 	{
+		if (!($response instanceof ApiMappingResponse)) return FALSE;
+
 		return $response->getEntity() !== NULL;
 	}
 

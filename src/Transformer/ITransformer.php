@@ -9,21 +9,13 @@ interface ITransformer
 {
 
 	/**
-	 * Parse given data from request
-	 *
-	 * @param ApiRequest $request
-	 * @param array $options
-	 * @return ApiRequest
-	 */
-	public function decode(ApiRequest $request, array $options = []);
-
-	/**
 	 * Encode given data for response
 	 *
+	 * @param ApiRequest $request
 	 * @param ApiResponse $response
-	 * @param array $options
+	 * @param array $context
 	 * @return ApiResponse
 	 */
-	public function encode(ApiResponse $response, array $options = []);
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []);
 
 }

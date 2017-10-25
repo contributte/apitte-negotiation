@@ -2,6 +2,7 @@
 
 namespace Apitte\Negotiation\Transformer;
 
+use Apitte\Mapping\Http\ApiRequest;
 use Apitte\Mapping\Http\ApiResponse;
 
 class CsvTransformer extends AbstractTransformer
@@ -10,14 +11,15 @@ class CsvTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
+	 * @param ApiRequest $request
 	 * @param ApiResponse $response
-	 * @param array $options
+	 * @param array $context
 	 * @return ApiResponse
 	 */
-	public function encode(ApiResponse $response, array $options = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
 		// Return immediately if response is not accepted
-		if (!$this->acceptResponse($response)) return $response;
+		if (!$this->accept($response)) return $response;
 
 		// Convert data to array to CSV
 		$content = $this->convert($response->getEntity()->toArray());
@@ -25,7 +27,7 @@ class CsvTransformer extends AbstractTransformer
 
 		// Setup content type
 		$response = $response
-			->withHeader('Content-Type', 'text/csv');
+			->withHeader('Content-Type', 'text/plain');
 
 		return $response;
 	}

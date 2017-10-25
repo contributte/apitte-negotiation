@@ -19,7 +19,7 @@ use Tester\Assert;
 test(function () {
 	Assert::exception(function () {
 		$negotiation = new SuffixNegotiator([]);
-		$negotiation->negotiateResponse(
+		$negotiation->negotiate(
 			new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()),
 			new ApiResponse(Psr7ResponseFactory::fromGlobal())
 		);
@@ -33,11 +33,8 @@ test(function () {
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org'));
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 
-	// 1# Negotiate request (same object as given);
-	Assert::same($request, $negotiation->negotiateRequest($request, $response));
-
-	// 2# Negotiate response (same object as given)
-	Assert::same($response, $negotiation->negotiateResponse($request, $response));
+	// Negotiate (same object as given);
+	Assert::same($response, $negotiation->negotiate($request, $response));
 });
 
 // JSON negotiation (according to .json suffix in URL)
@@ -48,11 +45,8 @@ test(function () {
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->writeJsonBody(['foo' => 'bar']);
 
-	// 1# Negotiate request
-	$request = $negotiation->negotiateRequest($request, $response);
-
 	// 2# Negotiate response (PSR7 body contains encoded json data)
-	$res = $negotiation->negotiateResponse($request, $response);
+	$res = $negotiation->negotiate($request, $response);
 	Assert::equal('{"foo":"bar"}', (string) $res->getBody());
 });
 
@@ -64,10 +58,7 @@ test(function () {
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->writeJsonBody(['foo' => 'bar']);
 
-	// 1# Negotiate request
-	$request = $negotiation->negotiateRequest($request, $response);
-
 	// 2# Negotiate response (PSR7 body contains encoded json data)
-	$res = $negotiation->negotiateResponse($request, $response);
+	$res = $negotiation->negotiate($request, $response);
 	Assert::equal('{"foo":"bar"}', (string) $res->getBody());
 });
