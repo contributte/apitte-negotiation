@@ -7,7 +7,7 @@ use Apitte\Mapping\Http\ApiRequest;
 use Apitte\Mapping\Http\ApiResponse;
 use Apitte\Negotiation\Transformer\ITransformer;
 
-class SuffixNegotiator implements INegotiator
+class DefaultNegotiator implements INegotiator
 {
 
 	/** @var ITransformer[] */
@@ -69,46 +69,30 @@ class SuffixNegotiator implements INegotiator
 
 		$negotiations = $endpoint->getNegotiations();
 
-		// Try match by allowed negotiations
+		// Try default
 		foreach ($negotiations as $negotiation) {
-			// Normalize suffix
-			$suffix = sprintf('.%s', ltrim($negotiation->getSuffix(), '.'));
+			// Skip non default negotiations
+			if (!$negotiation->isDefault()) continue;
 
-			// Try match by suffix
-			if ($this->match($request->getUri()->getPath(), $suffix)) {
-				$transformer = ltrim($suffix, '.');
+			// Normalize suffix for transformer
+			$transformer = ltrim($negotiation->getSuffix(), '.');
 
-				// If callback is defined -> process to callback transformer
-				if ($negotiation->getCallback()) {
-					$transformer = INegotiator::CALLBACK;
-					$context['callback'] = $negotiation->getCallback();
-				}
-
-				if (!isset($this->transformers[$transformer])) {
-					throw new InvalidStateException(sprintf('Transformer "%s" not registered', $transformer));
-				}
-
-				return $this->transformers[$transformer]->transform($request, $response, $context);
+			// If callback is defined -> process to callback transformer
+			if ($negotiation->getCallback()) {
+				$transformer = INegotiator::CALLBACK;
+				$context['callback'] = $negotiation->getCallback();
 			}
+
+			// Try default negotiation
+			if (!isset($this->transformers[$transformer])) {
+				throw new InvalidStateException(sprintf('Transformer "%s" not registered', $transformer));
+			}
+
+			// Transform (fallback) data to given format
+			return $this->transformers[$transformer]->transform($request, $response, $context);
 		}
 
 		return NULL;
-	}
-
-	/**
-	 * HELPERS *****************************************************************
-	 */
-
-	/**
-	 * Match transformer for the suffix? (.json?)
-	 *
-	 * @param string $path
-	 * @param string $suffix
-	 * @return bool
-	 */
-	private function match($path, $suffix)
-	{
-		return substr($path, -strlen($suffix)) === $suffix;
 	}
 
 }

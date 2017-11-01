@@ -8,11 +8,14 @@ use Apitte\Core\DI\Plugin\AbstractPlugin;
 use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
+use Apitte\Negotiation\DefaultNegotiator;
+use Apitte\Negotiation\FallbackNegotiator;
 use Apitte\Negotiation\Http\ArrayEntity;
 use Apitte\Negotiation\Resolver\ArrayEntityResolver;
 use Apitte\Negotiation\ResponseDataDecorator;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\ThrowExceptionDecorator;
+use Apitte\Negotiation\Transformer\CallbackTransformer;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Apitte\Negotiation\Transformer\JsonUnifyTransformer;
@@ -50,7 +53,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
-			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*'])
+			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
 			->setAutowired(FALSE);
 
 		$builder->addDefinition($this->prefix('transformer.json'))
@@ -63,12 +66,25 @@ class NegotiationPlugin extends AbstractPlugin
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(FALSE);
 
+		$builder->addDefinition($this->prefix('transformer.callback'))
+			->setFactory(CallbackTransformer::class)
+			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
+			->setAutowired(FALSE);
+
 		$builder->addDefinition($this->prefix('negotiation'))
 			->setFactory(ContentNegotiation::class);
 
 		$builder->addDefinition($this->prefix('negotiator.suffix'))
 			->setFactory(SuffixNegotiator::class)
 			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 100]);
+
+		$builder->addDefinition($this->prefix('negotiator.default'))
+			->setFactory(DefaultNegotiator::class)
+			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 200]);
+
+		$builder->addDefinition($this->prefix('negotiator.fallback'))
+			->setFactory(FallbackNegotiator::class)
+			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 300]);
 
 		$builder->addDefinition($this->prefix('decorator.responsedata'))
 			->setFactory(ResponseDataDecorator::class)
@@ -88,7 +104,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*'])
+				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
 				->setAutowired(FALSE);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
@@ -158,23 +174,35 @@ class NegotiationPlugin extends AbstractPlugin
 			throw new InvalidStateException(sprintf('No services with tag "%s"', ApiExtension::NEGOTIATION_TRANSFORMER_TAG));
 		}
 
-		// Find all services by names
-		$suffixTransformers = [];
-		foreach ($definitions as $name => $tag) {
-			// Skip invalid transformers
-			if (!isset($tag['suffix'])) continue;
+		// Init temporary array for services
+		$transformers = [
+			'suffix' => [],
+			'fallback' => NULL,
+		];
 
-			// Find suffix transformer service
-			$suffixTransformers[$tag['suffix']] = $builder->getDefinition($name);
+		// Find all services by names
+		foreach ($definitions as $name => $tag) {
+			if (isset($tag['suffix'])) {
+				// Find suffix transformer service
+				$transformers['suffix'][$tag['suffix']] = $builder->getDefinition($name);
+			}
+
+			if (isset($tag['fallback'])) {
+				$transformers['fallback'] = $builder->getDefinition($name);
+			}
 		}
 
-		// Suffix ==========================================
-
 		// Obtain suffix negotiator
-		$negotiator = $builder->getDefinition($this->prefix('negotiator.suffix'));
+		$suffixNegotiator = $builder->getDefinition($this->prefix('negotiator.suffix'));
+		$suffixNegotiator->setArguments([$transformers['suffix']]);
 
-		// Set services as argument
-		$negotiator->setArguments([$suffixTransformers]);
+		// Obtain default negotiator
+		$defaultNegotiator = $builder->getDefinition($this->prefix('negotiator.default'));
+		$defaultNegotiator->setArguments([$transformers['suffix']]);
+
+		// Obtain fallback negotiator
+		$fallbackNegotiator = $builder->getDefinition($this->prefix('negotiator.fallback'));
+		$fallbackNegotiator->setArguments([$transformers['fallback']]);
 	}
 
 	/**

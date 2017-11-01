@@ -8,6 +8,9 @@ use Apitte\Mapping\Http\ApiResponse;
 interface INegotiator
 {
 
+	const CALLBACK = '#';
+	const FALLBACK = '*';
+
 	/**
 	 * @param ApiRequest $request
 	 * @param ApiResponse $response
