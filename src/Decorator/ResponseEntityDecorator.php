@@ -36,14 +36,16 @@ class ResponseEntityDecorator implements IDecorator
 	 */
 	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = [])
 	{
-		$resolver = $this->getResolver($response);
-
+		// Try regular resolver
+		$resolver = $this->getResolver($response, $context);
 		if ($resolver) {
 			return $resolver->resolve($request, $response, $context);
 		}
 
-		if (isset($this->resolvers[self::FALLBACK])) {
-			return $this->resolvers[self::FALLBACK]->resolve($request, $response, $context);
+		// Try fallback resolver
+		$fallbackResolver = $this->getFallbackResolver($response, $context);
+		if ($fallbackResolver) {
+			return $fallbackResolver->resolve($request, $response, $context);
 		}
 
 		return $response;
@@ -51,9 +53,10 @@ class ResponseEntityDecorator implements IDecorator
 
 	/**
 	 * @param ApiResponse $response
+	 * @param array $context
 	 * @return IResolver|NULL
 	 */
-	protected function getResolver(ApiResponse $response)
+	protected function getResolver(ApiResponse $response, array $context = [])
 	{
 		// Early return if entity is not provided
 		if (!($entity = $response->getEntity())) return NULL;
@@ -72,6 +75,22 @@ class ResponseEntityDecorator implements IDecorator
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * @param ApiResponse $response
+	 * @param array $context
+	 * @return IResolver|NULL
+	 */
+	protected function getFallbackResolver(ApiResponse $response, array $context = [])
+	{
+		// If it has not exception, then return NULL
+		if (!isset($context['exception'])) return NULL;
+
+		// If there's no fallback resolver, then return NULL
+		if (!isset($this->resolvers[self::FALLBACK])) return NULL;
+
+		return $this->resolvers[self::FALLBACK];
 	}
 
 }
