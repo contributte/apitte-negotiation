@@ -52,7 +52,7 @@ class CsvTransformer extends AbstractTransformer
 	 */
 	protected function transformResponse(ApiRequest $request, ApiResponse $response)
 	{
-		$content = $this->convert($this->getEntity($response)->toArray());
+		$content = $this->convert($this->getEntity($response)->getData());
 		$response->getBody()->write($content);
 
 		// Setup content type

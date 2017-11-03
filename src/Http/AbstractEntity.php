@@ -6,12 +6,12 @@ abstract class AbstractEntity
 {
 
 	/** @var mixed */
-	protected $data = [];
+	protected $data;
 
 	/**
 	 * @param mixed $data
 	 */
-	public function __construct($data)
+	public function __construct($data = NULL)
 	{
 		$this->data = $data;
 	}
@@ -31,14 +31,6 @@ abstract class AbstractEntity
 	public function setData($data)
 	{
 		$this->data = $data;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function toArray()
-	{
-		return (array) $this->getData();
 	}
 
 }

@@ -24,7 +24,7 @@ class JsonTransformer extends AbstractTransformer
 			$content = Json::encode(['exception' => $context['exception']->getMessage()]);
 		} else {
 			// Convert data to array to json
-			$content = Json::encode($this->getEntity($response)->toArray());
+			$content = Json::encode($this->getEntity($response)->getData());
 		}
 
 		$response->getBody()->write($content);

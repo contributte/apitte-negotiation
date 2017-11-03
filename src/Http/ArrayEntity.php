@@ -2,7 +2,11 @@
 
 namespace Apitte\Negotiation\Http;
 
-class ArrayEntity extends AbstractEntity
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+
+class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 {
 
 	/**
@@ -20,6 +24,30 @@ class ArrayEntity extends AbstractEntity
 	public static function from(array $data)
 	{
 		return new static($data);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function toArray()
+	{
+		return (array) $this->getData();
+	}
+
+	/**
+	 * @return ArrayIterator
+	 */
+	public function getIterator()
+	{
+		return new ArrayIterator($this->toArray());
+	}
+
+	/**
+	 * @return int
+	 */
+	public function count()
+	{
+		return count($this->toArray());
 	}
 
 }

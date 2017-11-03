@@ -80,7 +80,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		$response = $this->unifyException($exception, $request, $response);
 
 		// Convert data to array to json
-		$content = Json::encode($this->getEntity($response)->toArray());
+		$content = Json::encode($this->getEntity($response)->getData());
 		$response->getBody()->write($content);
 
 		// Setup content type
@@ -101,7 +101,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		$response = $this->unifyResponse($request, $response);
 
 		// Convert data to array to json
-		$content = Json::encode($this->getEntity($response)->toArray());
+		$content = Json::encode($this->getEntity($response)->getData());
 		$response->getBody()->write($content);
 
 		// Setup content type
@@ -163,7 +163,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		return $response
 			->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
 				'status' => self::STATUS_SUCCESS,
-				'data' => $this->getEntity($response)->toArray(),
+				'data' => $this->getEntity($response)->getData(),
 			]));
 	}
 
