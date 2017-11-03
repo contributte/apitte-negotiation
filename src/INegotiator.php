@@ -2,13 +2,13 @@
 
 namespace Apitte\Negotiation;
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 
 interface INegotiator
 {
 
-	const CALLBACK = '#';
+	const RENDERER = '#';
 	const FALLBACK = '*';
 
 	/**

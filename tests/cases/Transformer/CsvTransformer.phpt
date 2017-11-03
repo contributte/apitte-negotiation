@@ -6,8 +6,8 @@
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\Http\CsvEntity;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Contributte\Psr7\Psr7ResponseFactory;

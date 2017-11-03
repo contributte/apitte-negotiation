@@ -2,8 +2,9 @@
 
 namespace Apitte\Negotiation\Resolver;
 
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\ContentNegotiation;
-use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -22,24 +23,14 @@ class ArrayEntityResolver implements IResolver
 	}
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
+	 * @param ApiRequest|ServerRequestInterface $request
+	 * @param ApiResponse|ResponseInterface $response
+	 * @param array $context
 	 * @return ResponseInterface
 	 */
-	public function resolveResponse(ServerRequestInterface $request, ResponseInterface $response)
+	public function resolve(ServerRequestInterface $request, ResponseInterface $response, array $context = [])
 	{
-		return $this->negotiation->negotiate($request, $response);
-	}
-
-	/**
-	 * @param Exception $exception
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
-	 */
-	public function resolveException(Exception $exception, ServerRequestInterface $request, ResponseInterface $response)
-	{
-		return $this->negotiation->negotiate($request, $response, ['exception' => $exception]);
+		return $this->negotiation->negotiate($request, $response, $context);
 	}
 
 }

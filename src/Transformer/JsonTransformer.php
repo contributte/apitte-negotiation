@@ -2,8 +2,8 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Nette\Utils\Json;
 
 class JsonTransformer extends AbstractTransformer
@@ -19,11 +19,14 @@ class JsonTransformer extends AbstractTransformer
 	 */
 	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
-		// Return immediately if response is not accepted
-		if (!$this->accept($response)) return $response;
+		if (isset($context['exception'])) {
+			// Convert exception to json
+			$content = Json::encode(['exception' => $context['exception']->getMessage()]);
+		} else {
+			// Convert data to array to json
+			$content = Json::encode($this->getEntity($response)->toArray());
+		}
 
-		// Convert data to array to json
-		$content = Json::encode($response->getEntity()->toArray());
 		$response->getBody()->write($content);
 
 		// Setup content type

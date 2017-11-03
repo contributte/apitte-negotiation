@@ -2,8 +2,9 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Exception;
 
 class CsvTransformer extends AbstractTransformer
 {
@@ -18,11 +19,40 @@ class CsvTransformer extends AbstractTransformer
 	 */
 	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
-		// Return immediately if response is not accepted
-		if (!$this->accept($response)) return $response;
+		if (isset($context['exception'])) {
+			return $this->transformException($context['exception'], $request, $response);
+		}
 
-		// Convert data to array to CSV
-		$content = $this->convert($response->getEntity()->toArray());
+		return $this->transformResponse($request, $response);
+	}
+
+	/**
+	 * @param Exception $exception
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
+	 */
+	protected function transformException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	{
+		$content = sprintf('Exception occurred with message "%s"', $exception->getMessage());
+		$response->getBody()->write($content);
+
+		// Setup content type
+		$response = $response
+			->withStatus(500)
+			->withHeader('Content-Type', 'text/plain');
+
+		return $response;
+	}
+
+	/**
+	 * @param ApiRequest $request
+	 * @param ApiResponse $response
+	 * @return ApiResponse
+	 */
+	protected function transformResponse(ApiRequest $request, ApiResponse $response)
+	{
+		$content = $this->convert($this->getEntity($response)->toArray());
 		$response->getBody()->write($content);
 
 		// Setup content type

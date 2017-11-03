@@ -3,8 +3,8 @@
 namespace Apitte\Negotiation;
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 
 class ContentNegotiation
 {

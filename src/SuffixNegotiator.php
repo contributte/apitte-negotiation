@@ -3,8 +3,8 @@
 namespace Apitte\Negotiation;
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\Transformer\ITransformer;
 
 class SuffixNegotiator implements INegotiator
@@ -62,11 +62,10 @@ class SuffixNegotiator implements INegotiator
 			throw new InvalidStateException('Please add at least one transformer');
 		}
 
-		// Validate that we have an endpoint
-		if (!($endpoint = $response->getEndpoint())) {
-			throw new InvalidStateException('Endpoint is required');
-		}
+		// Early return if there's no endpoint
+		if (!($endpoint = $response->getEndpoint())) return NULL;
 
+		// Get negotiations
 		$negotiations = $endpoint->getNegotiations();
 
 		// Try match by allowed negotiations
@@ -79,9 +78,9 @@ class SuffixNegotiator implements INegotiator
 				$transformer = ltrim($suffix, '.');
 
 				// If callback is defined -> process to callback transformer
-				if ($negotiation->getCallback()) {
-					$transformer = INegotiator::CALLBACK;
-					$context['callback'] = $negotiation->getCallback();
+				if ($negotiation->getRenderer()) {
+					$transformer = INegotiator::RENDERER;
+					$context['renderer'] = $negotiation->getRenderer();
 				}
 
 				if (!isset($this->transformers[$transformer])) {

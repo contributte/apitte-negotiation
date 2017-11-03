@@ -3,11 +3,11 @@
 namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Nette\DI\Container;
 
-class CallbackTransformer extends AbstractTransformer
+class RendererTransformer extends AbstractTransformer
 {
 
 	/** @var Container */
@@ -31,20 +31,21 @@ class CallbackTransformer extends AbstractTransformer
 	 */
 	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
-		// Return immediately if response is not accepted
-		if (!$this->accept($response)) return $response;
-
-		// Return immediately if context hasn't defined callback
-		if (!isset($context['callback'])) return $response;
+		// Return immediately if context hasn't defined renderer
+		if (!isset($context['renderer'])) return $response;
 
 		// Fetch service
-		$service = $this->container->getByType($context['callback']);
+		$service = $this->container->getByType($context['renderer'], FALSE);
 
-		if (!is_callable($service)) {
-			throw new InvalidStateException(sprintf('Callback "%s" must implement __invoke() method', $context['callback']));
+		if (!$service) {
+			throw new InvalidStateException(sprintf('Renderer "%s" is not registered in container', $context['renderer']));
 		}
 
-		return $service($request, $response);
+		if (!is_callable($service)) {
+			throw new InvalidStateException(sprintf('Renderer "%s" must implement __invoke() method', $context['renderer']));
+		}
+
+		return $service($request, $response, $context);
 	}
 
 }

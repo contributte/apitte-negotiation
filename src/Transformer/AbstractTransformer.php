@@ -2,33 +2,22 @@
 
 namespace Apitte\Negotiation\Transformer;
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
-use Apitte\Mapping\Http\ApiResponse as ApiMappingResponse;
+use Apitte\Core\Exception\Logical\InvalidStateException;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Negotiation\Http\AbstractEntity;
 
 abstract class AbstractTransformer implements ITransformer
 {
 
 	/**
-	 * @param ApiRequest $request
 	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return null
+	 * @return AbstractEntity
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	protected function getEntity(ApiResponse $response)
 	{
-		return NULL;
-	}
+		if (!$entity = $response->getEntity()) throw new InvalidStateException('Entity is required');
 
-	/**
-	 * @param ApiResponse $response
-	 * @return bool
-	 */
-	protected function accept(ApiResponse $response)
-	{
-		if (!($response instanceof ApiMappingResponse)) return FALSE;
-
-		return $response->getEntity() !== NULL;
+		return $entity;
 	}
 
 }

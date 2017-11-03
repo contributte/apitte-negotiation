@@ -7,8 +7,11 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 use Apitte\Core\Exception\Logical\InvalidStateException;
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Core\Schema\Endpoint;
+use Apitte\Core\Schema\EndpointNegotiation;
+use Apitte\Negotiation\Http\ArrayEntity;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Contributte\Psr7\Psr7ResponseFactory;
@@ -26,37 +29,28 @@ test(function () {
 	}, InvalidStateException::class, 'Please add at least one transformer');
 });
 
-// Same response (no suitable transformer)
+// Null response (no suitable transformer)
 test(function () {
 	$negotiation = new SuffixNegotiator(['.json' => new JsonTransformer()]);
 
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org'));
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 
-	// Negotiate (same object as given);
-	Assert::same($response, $negotiation->negotiate($request, $response));
+	Assert::null($negotiation->negotiate($request, $response));
 });
 
 // JSON negotiation (according to .json suffix in URL)
 test(function () {
-	$negotiation = new SuffixNegotiator(['.json' => new JsonTransformer()]);
+	$negotiation = new SuffixNegotiator(['json' => new JsonTransformer()]);
+
+	$enpoint = new Endpoint();
+	$enpoint->addNegotiation($en = new EndpointNegotiation());
+	$en->setSuffix('.json');
 
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.json'));
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
-	$response = $response->writeJsonBody(['foo' => 'bar']);
-
-	// 2# Negotiate response (PSR7 body contains encoded json data)
-	$res = $negotiation->negotiate($request, $response);
-	Assert::equal('{"foo":"bar"}', (string) $res->getBody());
-});
-
-// Fallback negotiation (*)
-test(function () {
-	$negotiation = new SuffixNegotiator(['*' => new JsonTransformer()]);
-
-	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.bar'));
-	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
-	$response = $response->writeJsonBody(['foo' => 'bar']);
+	$response = $response->withEntity(ArrayEntity::from(['foo' => 'bar']))
+		->withEndpoint($enpoint);
 
 	// 2# Negotiate response (PSR7 body contains encoded json data)
 	$res = $negotiation->negotiate($request, $response);

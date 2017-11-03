@@ -2,8 +2,8 @@
 
 namespace Apitte\Negotiation;
 
-use Apitte\Mapping\Http\ApiRequest;
-use Apitte\Mapping\Http\ApiResponse;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\Transformer\ITransformer;
 
 class FallbackNegotiator implements INegotiator
@@ -15,7 +15,7 @@ class FallbackNegotiator implements INegotiator
 	/**
 	 * @param ITransformer $transformer
 	 */
-	public function __construct(ITransformer $transformer = NULL)
+	public function __construct(ITransformer $transformer)
 	{
 		$this->transformer = $transformer;
 	}
@@ -28,11 +28,7 @@ class FallbackNegotiator implements INegotiator
 	 */
 	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = [])
 	{
-		if ($this->transformer) {
-			return $this->transformer->transform($request, $response, $context);
-		}
-
-		return $response;
+		return $this->transformer->transform($request, $response, $context);
 	}
 
 }

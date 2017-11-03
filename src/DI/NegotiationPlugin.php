@@ -2,23 +2,24 @@
 
 namespace Apitte\Negotiation\DI;
 
+use Apitte\Core\Decorator\IDecorator;
 use Apitte\Core\DI\ApiExtension;
 use Apitte\Core\DI\Helpers;
 use Apitte\Core\DI\Plugin\AbstractPlugin;
 use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
+use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
+use Apitte\Negotiation\Decorator\ThrowExceptionDecorator;
 use Apitte\Negotiation\DefaultNegotiator;
 use Apitte\Negotiation\FallbackNegotiator;
-use Apitte\Negotiation\Http\ArrayEntity;
+use Apitte\Negotiation\Http\AbstractEntity;
 use Apitte\Negotiation\Resolver\ArrayEntityResolver;
-use Apitte\Negotiation\ResponseDataDecorator;
 use Apitte\Negotiation\SuffixNegotiator;
-use Apitte\Negotiation\ThrowExceptionDecorator;
-use Apitte\Negotiation\Transformer\CallbackTransformer;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Apitte\Negotiation\Transformer\JsonUnifyTransformer;
+use Apitte\Negotiation\Transformer\RendererTransformer;
 
 class NegotiationPlugin extends AbstractPlugin
 {
@@ -51,11 +52,6 @@ class NegotiationPlugin extends AbstractPlugin
 		$config = $this->getConfig();
 		$globalConfig = $this->compiler->getExtension()->getConfig();
 
-		$builder->addDefinition($this->prefix('transformer.fallback'))
-			->setFactory(JsonTransformer::class)
-			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
-			->setAutowired(FALSE);
-
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
@@ -66,8 +62,13 @@ class NegotiationPlugin extends AbstractPlugin
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(FALSE);
 
-		$builder->addDefinition($this->prefix('transformer.callback'))
-			->setFactory(CallbackTransformer::class)
+		$builder->addDefinition($this->prefix('transformer.fallback'))
+			->setFactory(JsonTransformer::class)
+			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
+			->setAutowired(FALSE);
+
+		$builder->addDefinition($this->prefix('transformer.renderer'))
+			->setFactory(RendererTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
 			->setAutowired(FALSE);
 
@@ -86,17 +87,17 @@ class NegotiationPlugin extends AbstractPlugin
 			->setFactory(FallbackNegotiator::class)
 			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 300]);
 
-		$builder->addDefinition($this->prefix('decorator.responsedata'))
-			->setFactory(ResponseDataDecorator::class)
-			->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 500]);
+		$builder->addDefinition($this->prefix('decorator.responseEntity'))
+			->setFactory(ResponseEntityDecorator::class)
+			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::DISPATCHER_AFTER, IDecorator::DISPATCHER_EXCEPTION]]);
 
-		$builder->addDefinition($this->prefix('resolver.arrayentity'))
+		$builder->addDefinition($this->prefix('resolver.entity'))
 			->setFactory(ArrayEntityResolver::class)
-			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => ArrayEntity::class]);
+			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => AbstractEntity::class]);
 
 		$builder->addDefinition($this->prefix('resolver.fallback'))
 			->setFactory(ArrayEntityResolver::class)
-			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => ResponseDataDecorator::FALLBACK]);
+			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => '*']);
 
 		if ($config['unification'] === TRUE) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
@@ -113,9 +114,9 @@ class NegotiationPlugin extends AbstractPlugin
 		}
 
 		if ($config['catchException'] === FALSE && $globalConfig['debug'] === TRUE) {
-			$builder->addDefinition($this->prefix('decorator.throwexception'))
+			$builder->addDefinition($this->prefix('decorator.throwException'))
 				->setFactory(ThrowExceptionDecorator::class)
-				->addTag(ApiExtension::MAPPING_DECORATOR_TAG, ['priority' => 99]);
+				->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 99, 'type' => IDecorator::DISPATCHER_EXCEPTION]);
 		}
 	}
 
@@ -219,7 +220,7 @@ class NegotiationPlugin extends AbstractPlugin
 		if (!$definitions) return;
 
 		// Obtain response data decorator
-		$decorator = $builder->getDefinition($this->prefix('decorator.responsedata'));
+		$decorator = $builder->getDefinition($this->prefix('decorator.responseEntity'));
 
 		// Find all services by names
 		foreach ($definitions as $name => $tag) {

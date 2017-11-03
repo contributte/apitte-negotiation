@@ -40,7 +40,7 @@ class CsvEntity extends AbstractEntity
 	 */
 	private function update()
 	{
-		$this->withData(empty($this->header) ? $this->rows : array_merge([$this->header], $this->rows));
+		$this->setData(empty($this->header) ? $this->rows : array_merge([$this->header], $this->rows));
 	}
 
 }

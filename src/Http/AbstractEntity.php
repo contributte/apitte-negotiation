@@ -28,7 +28,7 @@ abstract class AbstractEntity
 	 * @param mixed $data
 	 * @return void
 	 */
-	public function withData($data)
+	public function setData($data)
 	{
 		$this->data = $data;
 	}
