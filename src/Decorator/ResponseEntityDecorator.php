@@ -5,92 +5,33 @@ namespace Apitte\Negotiation\Decorator;
 use Apitte\Core\Decorator\IDecorator;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
-use Apitte\Negotiation\Resolver\IResolver;
+use Apitte\Negotiation\ContentNegotiation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class ResponseEntityDecorator implements IDecorator
 {
 
-	// Resolvers
-	const FALLBACK = '*';
-
-	/** @var IResolver[] */
-	private $resolvers = [];
+	/** @var ContentNegotiation */
+	private $negotiation;
 
 	/**
-	 * @param string $class
-	 * @param IResolver $resolver
-	 * @return void
+	 * @param ContentNegotiation $negotiation
 	 */
-	public function addResolver($class, IResolver $resolver)
+	public function __construct(ContentNegotiation $negotiation)
 	{
-		$this->resolvers[$class] = $resolver;
+		$this->negotiation = $negotiation;
 	}
 
 	/**
 	 * @param ApiRequest|ServerRequestInterface $request
 	 * @param ApiResponse|ResponseInterface $response
 	 * @param array $context
-	 * @return ServerRequestInterface|ResponseInterface
+	 * @return ResponseInterface
 	 */
 	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = [])
 	{
-		// Try regular resolver
-		$resolver = $this->getResolver($response, $context);
-		if ($resolver) {
-			return $resolver->resolve($request, $response, $context);
-		}
-
-		// Try fallback resolver
-		$fallbackResolver = $this->getFallbackResolver($response, $context);
-		if ($fallbackResolver) {
-			return $fallbackResolver->resolve($request, $response, $context);
-		}
-
-		return $response;
-	}
-
-	/**
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return IResolver|NULL
-	 */
-	protected function getResolver(ApiResponse $response, array $context = [])
-	{
-		// Early return if entity is not provided
-		if (!($entity = $response->getEntity())) return NULL;
-
-		// Get class name of entity
-		$entityClass = get_class($entity);
-
-		foreach ($this->resolvers as $resolverClass => $resolver) {
-			// Skip fallback
-			if ($resolverClass === self::FALLBACK) continue;
-
-			// Find resolver
-			if ($resolverClass === $entityClass || is_subclass_of($entity, $resolverClass)) {
-				return $resolver;
-			}
-		}
-
-		return NULL;
-	}
-
-	/**
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return IResolver|NULL
-	 */
-	protected function getFallbackResolver(ApiResponse $response, array $context = [])
-	{
-		// If it has not exception, then return NULL
-		if (!isset($context['exception'])) return NULL;
-
-		// If there's no fallback resolver, then return NULL
-		if (!isset($this->resolvers[self::FALLBACK])) return NULL;
-
-		return $this->resolvers[self::FALLBACK];
+		return $this->negotiation->negotiate($request, $response, $context);
 	}
 
 }

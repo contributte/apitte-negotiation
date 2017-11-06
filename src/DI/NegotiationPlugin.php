@@ -13,7 +13,6 @@ use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
 use Apitte\Negotiation\Decorator\ThrowExceptionDecorator;
 use Apitte\Negotiation\DefaultNegotiator;
 use Apitte\Negotiation\FallbackNegotiator;
-use Apitte\Negotiation\Http\AbstractEntity;
 use Apitte\Negotiation\Resolver\ArrayEntityResolver;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\CsvTransformer;
@@ -87,17 +86,9 @@ class NegotiationPlugin extends AbstractPlugin
 			->setFactory(FallbackNegotiator::class)
 			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 300]);
 
-		$builder->addDefinition($this->prefix('decorator.responseEntity'))
+		$builder->addDefinition($this->prefix('decorator.response'))
 			->setFactory(ResponseEntityDecorator::class)
 			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::DISPATCHER_AFTER, IDecorator::DISPATCHER_EXCEPTION]]);
-
-		$builder->addDefinition($this->prefix('resolver.entity'))
-			->setFactory(ArrayEntityResolver::class)
-			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => AbstractEntity::class]);
-
-		$builder->addDefinition($this->prefix('resolver.fallback'))
-			->setFactory(ArrayEntityResolver::class)
-			->addTag(ApiExtension::NEGOTIATION_RESOLVER_TAG, ['entity' => '*']);
 
 		if ($config['unification'] === TRUE) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
@@ -129,7 +120,6 @@ class NegotiationPlugin extends AbstractPlugin
 	{
 		$this->compileTaggedNegotiators();
 		$this->compileTaggedTransformers();
-		$this->compileTaggedResolvers();
 	}
 
 	/**
@@ -204,32 +194,6 @@ class NegotiationPlugin extends AbstractPlugin
 		// Obtain fallback negotiator
 		$fallbackNegotiator = $builder->getDefinition($this->prefix('negotiator.fallback'));
 		$fallbackNegotiator->setArguments([$transformers['fallback']]);
-	}
-
-	/**
-	 * @return void
-	 */
-	protected function compileTaggedResolvers()
-	{
-		$builder = $this->getContainerBuilder();
-
-		// Find all definitions by tag
-		$definitions = $builder->findByTag(ApiExtension::NEGOTIATION_RESOLVER_TAG);
-
-		// Ensure we have at least 1 service
-		if (!$definitions) return;
-
-		// Obtain response data decorator
-		$decorator = $builder->getDefinition($this->prefix('decorator.responseEntity'));
-
-		// Find all services by names
-		foreach ($definitions as $name => $tag) {
-			// Skip invalid resolvers
-			if (!isset($tag['entity'])) continue;
-
-			// Add resolver to decorator
-			$decorator->addSetup('addResolver', [$tag['entity'], $builder->getDefinition($name)]);
-		}
 	}
 
 }
