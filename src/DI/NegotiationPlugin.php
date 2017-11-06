@@ -13,7 +13,6 @@ use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
 use Apitte\Negotiation\Decorator\ThrowExceptionDecorator;
 use Apitte\Negotiation\DefaultNegotiator;
 use Apitte\Negotiation\FallbackNegotiator;
-use Apitte\Negotiation\Resolver\ArrayEntityResolver;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\CsvTransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
@@ -47,6 +46,10 @@ class NegotiationPlugin extends AbstractPlugin
 	 */
 	public function loadPluginConfiguration()
 	{
+		if (!$this->compiler->getPlugin('decorator')) {
+			throw new InvalidStateException(sprintf('Plugin "CoreDecoratorPlugin" must be enabled'));
+		}
+
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig();
 		$globalConfig = $this->compiler->getExtension()->getConfig();
