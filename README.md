@@ -28,6 +28,13 @@ composer require apitte/negotiation
 |-------------|--------------|----------|----------|
 | development | `dev-master` | `master` | `>= 5.6` |
 
+## Overview
+
+- [Installation - how to register a plugin](https://github.com/apitte/negotiation/tree/master/.docs#plugin)
+- [Configuration - how to configure](https://github.com/apitte/negotiation/tree/master/.docs#configuration)
+- [Negotiation - content negotiation](https://github.com/apitte/negotiation/tree/master/.docs#negotiation)
+- [Playground - real examples](https://github.com/apitte/negotiation/tree/master/.docs#playground)
+
 ## Maintainers
 
 <table>
