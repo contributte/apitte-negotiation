@@ -91,7 +91,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 		$builder->addDefinition($this->prefix('decorator.response'))
 			->setFactory(ResponseEntityDecorator::class)
-			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::DISPATCHER_AFTER, IDecorator::DISPATCHER_EXCEPTION]]);
+			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::ON_HANDLER_AFTER, IDecorator::ON_DISPATCHER_EXCEPTION]]);
 
 		if ($config['unification'] === TRUE) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
@@ -110,7 +110,7 @@ class NegotiationPlugin extends AbstractPlugin
 		if ($config['catchException'] === FALSE && $globalConfig['debug'] === TRUE) {
 			$builder->addDefinition($this->prefix('decorator.throwException'))
 				->setFactory(ThrowExceptionDecorator::class)
-				->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 99, 'type' => IDecorator::DISPATCHER_EXCEPTION]);
+				->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 99, 'type' => IDecorator::ON_DISPATCHER_EXCEPTION]);
 		}
 	}
 
