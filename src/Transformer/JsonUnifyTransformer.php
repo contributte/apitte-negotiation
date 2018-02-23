@@ -177,16 +177,16 @@ class JsonUnifyTransformer extends AbstractTransformer
 	{
 		// Analyze status code
 		$code = $exception->getCode();
-		$code = $code < 400 || $code > 500 ? $this->options['codes'][self::DEFAULT_CLIENT_ERROR_CODE] : $code;
+		// $code = $code < 400 || $code > 500 ? $this->options['codes'][self::DEFAULT_CLIENT_ERROR_CODE] : $code;
 
 		$data = [
 			'code' => $code,
-			'error' => $exception->getMessage(),
-			'context' => $exception->getContext(),
+			'message' => $exception->getMessage(),
+			// 'context' => $exception->getContext(),
 		];
 
 		return $response
-			->withStatus($code)
+			->withStatus(400)
 			->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
 				'status' => self::STATUS_ERROR,
 				'data' => $data,
