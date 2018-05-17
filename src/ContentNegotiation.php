@@ -17,9 +17,8 @@ class ContentNegotiation
 
 	/**
 	 * @param array $negotiators
-	 * @param array $options
 	 */
-	public function __construct(array $negotiators = [], array $options = [])
+	public function __construct(array $negotiators = [])
 	{
 		$this->addNegotiations($negotiators);
 	}
