@@ -36,7 +36,7 @@ class MappingEntity extends AbstractEntity
 	}
 
 	/**
-	 * @param IResponseEntity $value
+	 * @param IResponseEntity $entity
 	 * @return static
 	 */
 	public static function from(IResponseEntity $entity)
