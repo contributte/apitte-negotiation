@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 /**
  * Test: Transformer\CsvTransformer
@@ -15,12 +15,12 @@ use Contributte\Psr7\Psr7ServerRequestFactory;
 use Tester\Assert;
 
 // Encode
-test(function () {
+test(function (): void {
 	$transformer = new CsvTransformer();
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal());
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->withEntity(
-		(new CsvEntity(NULL))
+		(new CsvEntity(null))
 			->withRows([
 				['1', '2', '3'],
 				['4', '5', '6'],

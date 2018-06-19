@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation;
 
@@ -8,15 +8,12 @@ use Apitte\Core\Http\ApiResponse;
 interface INegotiator
 {
 
-	const RENDERER = '#';
-	const FALLBACK = '*';
+	public const RENDERER = '#';
+	public const FALLBACK = '*';
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse|NULL
+	 * @param mixed[] $context
 	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []);
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse;
 
 }

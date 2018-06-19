@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 /**
  * Test: Transformer\JsonTransformer
@@ -15,7 +15,7 @@ use Contributte\Psr7\Psr7ServerRequestFactory;
 use Tester\Assert;
 
 // Encode
-test(function () {
+test(function (): void {
 	$transformer = new JsonTransformer();
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal());
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());

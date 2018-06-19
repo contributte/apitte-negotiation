@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation;
 
@@ -22,48 +22,31 @@ class DefaultNegotiator implements INegotiator
 	}
 
 	/**
-	 * GETTERS/SETTERS *********************************************************
-	 */
-
-	/**
 	 * @param ITransformer[] $transformers
-	 * @return void
 	 */
-	private function addTransformers(array $transformers)
+	private function addTransformers(array $transformers): void
 	{
 		foreach ($transformers as $suffix => $transformer) {
 			$this->addTransformer($suffix, $transformer);
 		}
 	}
 
-	/**
-	 * @param string $suffix
-	 * @param ITransformer $transformer
-	 * @return void
-	 */
-	private function addTransformer($suffix, ITransformer $transformer)
+	private function addTransformer(string $suffix, ITransformer $transformer): void
 	{
 		$this->transformers[$suffix] = $transformer;
 	}
 
 	/**
-	 * NEGOTIATION *************************************************************
+	 * @param mixed[] $context
 	 */
-
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
-	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
 		}
 
 		// Early return if there's no endpoint
-		if (!($endpoint = $response->getEndpoint())) return NULL;
+		if (!($endpoint = $response->getEndpoint())) return null;
 
 		// Get negotiations
 		$negotiations = $endpoint->getNegotiations();
@@ -91,7 +74,7 @@ class DefaultNegotiator implements INegotiator
 			return $this->transformers[$transformer]->transform($request, $response, $context);
 		}
 
-		return NULL;
+		return null;
 	}
 
 }

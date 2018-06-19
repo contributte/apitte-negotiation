@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Http;
 
@@ -10,9 +10,6 @@ class MappingEntity extends AbstractEntity
 	/** @var IResponseEntity */
 	protected $entity;
 
-	/**
-	 * @param IResponseEntity $entity
-	 */
 	public function __construct(IResponseEntity $entity)
 	{
 		parent::__construct();
@@ -20,26 +17,19 @@ class MappingEntity extends AbstractEntity
 	}
 
 	/**
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function getData()
+	public function getData(): array
 	{
 		return $this->entity->toResponse();
 	}
 
-	/**
-	 * @return IResponseEntity
-	 */
-	public function getEntity()
+	public function getEntity(): IResponseEntity
 	{
 		return $this->entity;
 	}
 
-	/**
-	 * @param IResponseEntity $entity
-	 * @return static
-	 */
-	public static function from(IResponseEntity $entity)
+	public static function from(IResponseEntity $entity): self
 	{
 		return new static($entity);
 	}

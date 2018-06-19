@@ -1,10 +1,10 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
-use Exception;
+use Throwable;
 
 class CsvTransformer extends AbstractTransformer
 {
@@ -12,12 +12,9 @@ class CsvTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse
 	{
 		if (isset($context['exception'])) {
 			return $this->transformException($context['exception'], $request, $response);
@@ -26,13 +23,7 @@ class CsvTransformer extends AbstractTransformer
 		return $this->transformResponse($request, $response);
 	}
 
-	/**
-	 * @param Exception $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function transformException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function transformException(Throwable $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		$content = sprintf('Exception occurred with message "%s"', $exception->getMessage());
 		$response->getBody()->write($content);
@@ -45,12 +36,7 @@ class CsvTransformer extends AbstractTransformer
 		return $response;
 	}
 
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function transformResponse(ApiRequest $request, ApiResponse $response)
+	protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		$content = $this->convert($this->getEntity($response)->getData());
 		$response->getBody()->write($content);
@@ -63,12 +49,9 @@ class CsvTransformer extends AbstractTransformer
 	}
 
 	/**
-	 * @param array[] $rows
-	 * @param string $delimiter
-	 * @param string $enclosure
-	 * @return string
+	 * @param mixed[][] $rows
 	 */
-	private function convert($rows, $delimiter = ',', $enclosure = '"')
+	private function convert(array $rows, string $delimiter = ',', string $enclosure = '"'): string
 	{
 		$fp = fopen('php://temp', 'r+');
 		foreach ($rows as $row) {

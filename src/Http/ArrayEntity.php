@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Http;
 
@@ -10,7 +10,7 @@ class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 {
 
 	/**
-	 * @param array $data
+	 * @param mixed[] $data
 	 */
 	public function __construct(array $data)
 	{
@@ -18,34 +18,27 @@ class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 	}
 
 	/**
-	 * @param array $data
-	 * @return static
+	 * @param mixed[] $data
 	 */
-	public static function from(array $data)
+	public static function from(array $data): self
 	{
 		return new static($data);
 	}
 
 	/**
-	 * @return array
+	 * @return mixed[]
 	 */
-	public function toArray()
+	public function toArray(): array
 	{
 		return (array) $this->getData();
 	}
 
-	/**
-	 * @return ArrayIterator
-	 */
-	public function getIterator()
+	public function getIterator(): ArrayIterator
 	{
 		return new ArrayIterator($this->toArray());
 	}
 
-	/**
-	 * @return int
-	 */
-	public function count()
+	public function count(): int
 	{
 		return count($this->toArray());
 	}

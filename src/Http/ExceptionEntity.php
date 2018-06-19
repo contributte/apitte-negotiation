@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Http;
 
 use Exception;
+use Throwable;
 
 class ExceptionEntity extends AbstractEntity
 {
@@ -10,19 +11,13 @@ class ExceptionEntity extends AbstractEntity
 	/** @var Exception */
 	protected $exception;
 
-	/**
-	 * @param Exception $exception
-	 */
-	public function __construct(Exception $exception)
+	public function __construct(Throwable $exception)
 	{
 		parent::__construct();
 		$this->exception = $exception;
 	}
 
-	/**
-	 * @return Exception
-	 */
-	public function getException()
+	public function getException(): Throwable
 	{
 		return $this->exception;
 	}

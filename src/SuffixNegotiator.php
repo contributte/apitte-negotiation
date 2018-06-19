@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation;
 
@@ -22,48 +22,31 @@ class SuffixNegotiator implements INegotiator
 	}
 
 	/**
-	 * GETTERS/SETTERS *********************************************************
-	 */
-
-	/**
 	 * @param ITransformer[] $transformers
-	 * @return void
 	 */
-	private function addTransformers(array $transformers)
+	private function addTransformers(array $transformers): void
 	{
 		foreach ($transformers as $suffix => $transformer) {
 			$this->addTransformer($suffix, $transformer);
 		}
 	}
 
-	/**
-	 * @param string $suffix
-	 * @param ITransformer $transformer
-	 * @return void
-	 */
-	private function addTransformer($suffix, ITransformer $transformer)
+	private function addTransformer(string $suffix, ITransformer $transformer): void
 	{
 		$this->transformers[$suffix] = $transformer;
 	}
 
 	/**
-	 * NEGOTIATION *************************************************************
+	 * @param mixed[] $context
 	 */
-
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
-	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
 	{
 		if (!$this->transformers) {
 			throw new InvalidStateException('Please add at least one transformer');
 		}
 
 		// Early return if there's no endpoint
-		if (!($endpoint = $response->getEndpoint())) return NULL;
+		if (!($endpoint = $response->getEndpoint())) return null;
 
 		// Get negotiations
 		$negotiations = $endpoint->getNegotiations();
@@ -91,21 +74,13 @@ class SuffixNegotiator implements INegotiator
 			}
 		}
 
-		return NULL;
+		return null;
 	}
 
 	/**
-	 * HELPERS *****************************************************************
-	 */
-
-	/**
 	 * Match transformer for the suffix? (.json?)
-	 *
-	 * @param string $path
-	 * @param string $suffix
-	 * @return bool
 	 */
-	private function match($path, $suffix)
+	private function match(string $path, string $suffix): bool
 	{
 		return substr($path, -strlen($suffix)) === $suffix;
 	}

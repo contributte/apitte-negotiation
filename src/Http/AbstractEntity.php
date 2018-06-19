@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Http;
 
@@ -11,7 +11,7 @@ abstract class AbstractEntity
 	/**
 	 * @param mixed $data
 	 */
-	public function __construct($data = NULL)
+	public function __construct($data = null)
 	{
 		$this->data = $data;
 	}
@@ -26,9 +26,8 @@ abstract class AbstractEntity
 
 	/**
 	 * @param mixed $data
-	 * @return void
 	 */
-	protected function setData($data)
+	protected function setData($data): void
 	{
 		$this->data = $data;
 	}

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Decorator;
 
@@ -10,12 +10,9 @@ class ThrowExceptionDecorator implements IDecorator
 {
 
 	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param array $context
-	 * @return ResponseInterface
+	 * @param mixed[] $context
 	 */
-	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = [])
+	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = []): ResponseInterface
 	{
 		if (isset($context['exception'])) {
 			throw $context['exception'];
