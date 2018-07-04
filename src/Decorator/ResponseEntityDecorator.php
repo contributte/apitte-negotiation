@@ -33,7 +33,7 @@ class ResponseEntityDecorator implements IDecorator
 		// Skip if there's no entity and no $context, it does not make sence
 		// to negotiate response without entity.
 		// Except if there's exception in $context.
-		if ($response->getEntity() === null && empty($context)) return $response;
+		if ($response->getEntity() === null && $context === []) return $response;
 
 		return $this->negotiation->negotiate($request, $response, $context);
 	}
