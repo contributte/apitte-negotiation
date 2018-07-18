@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
@@ -14,12 +14,9 @@ class JsonTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse
 	{
 		if (isset($context['exception'])) {
 			// Convert exception to json
@@ -39,9 +36,7 @@ class JsonTransformer extends AbstractTransformer
 	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
+	 * @param mixed[] $context
 	 * @return mixed
 	 */
 	protected function extractData(ApiRequest $request, ApiResponse $response, array $context)
@@ -50,12 +45,10 @@ class JsonTransformer extends AbstractTransformer
 	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return array
+	 * @param mixed[] $context
+	 * @return mixed[]
 	 */
-	protected function extractException(ApiRequest $request, ApiResponse $response, array $context)
+	protected function extractException(ApiRequest $request, ApiResponse $response, array $context): array
 	{
 		$exception = $context['exception'];
 		$data = ['exception' => $exception->getMessage()];

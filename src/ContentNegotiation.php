@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation;
 
@@ -10,13 +10,13 @@ class ContentNegotiation
 {
 
 	// Attributes in ApiRequest
-	const ATTR_SKIP = 'apitte.negotiation.skip';
+	public const ATTR_SKIP = 'apitte.negotiation.skip';
 
 	/** @var INegotiator[] */
 	protected $negotiators = [];
 
 	/**
-	 * @param array $negotiators
+	 * @param INegotiator[] $negotiators
 	 */
 	public function __construct(array $negotiators = [])
 	{
@@ -24,34 +24,27 @@ class ContentNegotiation
 	}
 
 	/**
-	 * SETTERS *****************************************************************
-	 */
-
-	/**
 	 * @param INegotiator[] $negotiators
-	 * @return void
 	 */
-	public function addNegotiations(array $negotiators)
+	public function addNegotiations(array $negotiators): void
 	{
 		foreach ($negotiators as $negotiator) {
-			$this->negotiators[] = $negotiator;
+			$this->addNegotiation($negotiator);
 		}
 	}
 
-	/**
-	 * API *********************************************************************
-	 */
+	public function addNegotiation(INegotiator $negotiator): void
+	{
+		$this->negotiators[] = $negotiator;
+	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
 	{
 		// Should we skip negotiation?
-		if ($request->getAttribute(self::ATTR_SKIP, FALSE) === TRUE) return $response;
+		if ($request->getAttribute(self::ATTR_SKIP, false) === true) return $response;
 
 		// Validation
 		if (!$this->negotiators) {
@@ -63,7 +56,7 @@ class ContentNegotiation
 			$negotiated = $negotiator->negotiate($request, $response, $context);
 
 			// If it's not NULL, we have an ApiResponse
-			if ($negotiated !== NULL) return $negotiated;
+			if ($negotiated !== null) return $negotiated;
 		}
 
 		return $response;

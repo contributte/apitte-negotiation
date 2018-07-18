@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation;
 
@@ -12,21 +12,15 @@ class FallbackNegotiator implements INegotiator
 	/** @var ITransformer */
 	protected $transformer;
 
-	/**
-	 * @param ITransformer $transformer
-	 */
 	public function __construct(ITransformer $transformer)
 	{
 		$this->transformer = $transformer;
 	}
 
 	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
 	{
 		return $this->transformer->transform($request, $response, $context);
 	}

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\DI;
 
@@ -22,17 +22,14 @@ use Apitte\Negotiation\Transformer\RendererTransformer;
 class NegotiationPlugin extends AbstractPlugin
 {
 
-	const PLUGIN_NAME = 'negotiation';
+	public const PLUGIN_NAME = 'negotiation';
 
-	/** @var array */
+	/** @var mixed[] */
 	protected $defaults = [
-		'unification' => FALSE,
-		'catchException' => FALSE,
+		'unification' => false,
+		'catchException' => false,
 	];
 
-	/**
-	 * @param PluginCompiler $compiler
-	 */
 	public function __construct(PluginCompiler $compiler)
 	{
 		parent::__construct($compiler);
@@ -41,10 +38,8 @@ class NegotiationPlugin extends AbstractPlugin
 
 	/**
 	 * Register services
-	 *
-	 * @return void
 	 */
-	public function loadPluginConfiguration()
+	public function loadPluginConfiguration(): void
 	{
 		if (!$this->compiler->getPlugin('decorator')) {
 			throw new InvalidStateException(sprintf('Plugin "CoreDecoratorPlugin" must be enabled'));
@@ -57,22 +52,22 @@ class NegotiationPlugin extends AbstractPlugin
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
-			->setAutowired(FALSE);
+			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.csv'))
 			->setFactory(CsvTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
-			->setAutowired(FALSE);
+			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
-			->setAutowired(FALSE);
+			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
 			->setFactory(RendererTransformer::class)
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
-			->setAutowired(FALSE);
+			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('negotiation'))
 			->setFactory(ContentNegotiation::class);
@@ -93,21 +88,21 @@ class NegotiationPlugin extends AbstractPlugin
 			->setFactory(ResponseEntityDecorator::class)
 			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::ON_HANDLER_AFTER, IDecorator::ON_DISPATCHER_EXCEPTION]]);
 
-		if ($config['unification'] === TRUE) {
+		if ($config['unification'] === true) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
 			$builder->removeDefinition($this->prefix('transformer.json'));
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
-				->setAutowired(FALSE);
+				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
-				->setAutowired(FALSE);
+				->setAutowired(false);
 		}
 
-		if ($config['catchException'] === FALSE && $globalConfig['debug'] === TRUE) {
+		if ($config['catchException'] === false && $globalConfig['debug'] === true) {
 			$builder->addDefinition($this->prefix('decorator.throwException'))
 				->setFactory(ThrowExceptionDecorator::class)
 				->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 99, 'type' => IDecorator::ON_DISPATCHER_EXCEPTION]);
@@ -116,19 +111,14 @@ class NegotiationPlugin extends AbstractPlugin
 
 	/**
 	 * Decorate services
-	 *
-	 * @return void
 	 */
-	public function beforePluginCompile()
+	public function beforePluginCompile(): void
 	{
 		$this->compileTaggedNegotiators();
 		$this->compileTaggedTransformers();
 	}
 
-	/**
-	 * @return void
-	 */
-	protected function compileTaggedNegotiators()
+	protected function compileTaggedNegotiators(): void
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -153,10 +143,7 @@ class NegotiationPlugin extends AbstractPlugin
 		$negotiation->setArguments([$negotiators]);
 	}
 
-	/**
-	 * @return void
-	 */
-	protected function compileTaggedTransformers()
+	protected function compileTaggedTransformers(): void
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -171,7 +158,7 @@ class NegotiationPlugin extends AbstractPlugin
 		// Init temporary array for services
 		$transformers = [
 			'suffix' => [],
-			'fallback' => NULL,
+			'fallback' => null,
 		];
 
 		// Find all services by names

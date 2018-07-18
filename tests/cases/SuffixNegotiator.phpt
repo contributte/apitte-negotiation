@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 /**
  * Test: SuffixNegotiator
@@ -19,8 +19,8 @@ use Contributte\Psr7\Psr7ServerRequestFactory;
 use Tester\Assert;
 
 // No transformer
-test(function () {
-	Assert::exception(function () {
+test(function (): void {
+	Assert::exception(function (): void {
 		$negotiation = new SuffixNegotiator([]);
 		$negotiation->negotiate(
 			new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()),
@@ -30,7 +30,7 @@ test(function () {
 });
 
 // Null response (no suitable transformer)
-test(function () {
+test(function (): void {
 	$negotiation = new SuffixNegotiator(['.json' => new JsonTransformer()]);
 
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org'));
@@ -40,7 +40,7 @@ test(function () {
 });
 
 // JSON negotiation (according to .json suffix in URL)
-test(function () {
+test(function (): void {
 	$negotiation = new SuffixNegotiator(['json' => new JsonTransformer()]);
 
 	$enpoint = new Endpoint();

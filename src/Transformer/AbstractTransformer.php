@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
@@ -9,11 +9,7 @@ use Apitte\Negotiation\Http\AbstractEntity;
 abstract class AbstractTransformer implements ITransformer
 {
 
-	/**
-	 * @param ApiResponse $response
-	 * @return AbstractEntity
-	 */
-	protected function getEntity(ApiResponse $response)
+	protected function getEntity(ApiResponse $response): AbstractEntity
 	{
 		if (!$entity = $response->getEntity()) throw new InvalidStateException('Entity is required');
 

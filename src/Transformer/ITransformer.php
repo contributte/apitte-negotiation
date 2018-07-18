@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
@@ -11,11 +11,8 @@ interface ITransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = []);
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse;
 
 }

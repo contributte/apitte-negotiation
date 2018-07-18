@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
@@ -8,18 +8,19 @@ use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use Apitte\Core\Http\ResponseAttributes;
 use Apitte\Negotiation\Http\ArrayEntity;
-use Exception;
 use Nette\Utils\Json;
+use Throwable;
 
 class JsonUnifyTransformer extends AbstractTransformer
 {
 
-	const DEFAULT_SUCCESS_CODE = 'success';
-	const DEFAULT_CLIENT_ERROR_CODE = 'error.client';
-	const DEFAULT_SERVER_ERROR_CODE = 'error.server';
-	const DEFAULT_EXCEPTION_CODE = 'error';
+	public const
+		DEFAULT_SUCCESS_CODE = 'success',
+		DEFAULT_CLIENT_ERROR_CODE = 'error.client',
+		DEFAULT_SERVER_ERROR_CODE = 'error.server',
+		DEFAULT_EXCEPTION_CODE = 'error';
 
-	/** @var array */
+	/** @var mixed[] */
 	protected $options = [
 		'codes' => [
 			self::DEFAULT_SUCCESS_CODE => 200,
@@ -30,11 +31,12 @@ class JsonUnifyTransformer extends AbstractTransformer
 	];
 
 	// Statuses
-	const STATUS_SUCCESS = 'success';
-	const STATUS_ERROR = 'error';
+	public const
+		STATUS_SUCCESS = 'success',
+		STATUS_ERROR = 'error';
 
 	/**
-	 * @param array $options
+	 * @param mixed[] $options
 	 */
 	public function __construct(array $options = [])
 	{
@@ -42,11 +44,9 @@ class JsonUnifyTransformer extends AbstractTransformer
 	}
 
 	/**
-	 * @param string $key
 	 * @param mixed $value
-	 * @return void
 	 */
-	public function setOption($key, $value)
+	public function setOption(string $key, $value): void
 	{
 		$this->options[$key] = $value;
 	}
@@ -54,12 +54,9 @@ class JsonUnifyTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse
 	{
 		if (isset($context['exception'])) {
 			return $this->transformException($context['exception'], $request, $response);
@@ -68,13 +65,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		return $this->transformResponse($request, $response);
 	}
 
-	/**
-	 * @param Exception $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function transformException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function transformException(Throwable $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Unify response
 		$response = $this->unifyException($exception, $request, $response);
@@ -90,12 +81,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		return $response;
 	}
 
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function transformResponse(ApiRequest $request, ApiResponse $response)
+	protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Unify response
 		$response = $this->unifyResponse($request, $response);
@@ -111,27 +97,12 @@ class JsonUnifyTransformer extends AbstractTransformer
 		return $response;
 	}
 
-	/**
-	 * UNIFICATION *************************************************************
-	 */
-
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function unifyResponse(ApiRequest $request, ApiResponse $response)
+	protected function unifyResponse(ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		return $this->processSuccess($request, $response);
 	}
 
-	/**
-	 * @param Exception $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function unifyException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function unifyException(Throwable $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		if ($exception instanceof ClientErrorException) {
 			return $this->processClientError($exception, $request, $response);
@@ -144,16 +115,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 		return $this->processException($exception, $request, $response);
 	}
 
-	/**
-	 * PROCESSING **************************************************************
-	 */
-
-	/**
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function processSuccess(ApiRequest $request, ApiResponse $response)
+	protected function processSuccess(ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Setup status code only if it's not set already
 		if (!$response->getStatusCode()) {
@@ -167,13 +129,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 			]));
 	}
 
-	/**
-	 * @param ClientErrorException $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function processClientError(ClientErrorException $exception, ApiRequest $request, ApiResponse $response)
+	protected function processClientError(ClientErrorException $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Analyze status code
 		$code = $exception->getCode();
@@ -193,13 +149,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 			]));
 	}
 
-	/**
-	 * @param ServerErrorException $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function processServerError(ServerErrorException $exception, ApiRequest $request, ApiResponse $response)
+	protected function processServerError(ServerErrorException $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Analyze status code
 		$code = $exception->getCode();
@@ -213,13 +163,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 			]));
 	}
 
-	/**
-	 * @param Exception $exception
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @return ApiResponse
-	 */
-	protected function processException(Exception $exception, ApiRequest $request, ApiResponse $response)
+	protected function processException(Throwable $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
 		// Analyze status code
 		$code = $exception->getCode();

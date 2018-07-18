@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Transformer;
 
@@ -13,9 +13,6 @@ class RendererTransformer extends AbstractTransformer
 	/** @var Container */
 	protected $container;
 
-	/**
-	 * @param Container $container
-	 */
 	public function __construct(Container $container)
 	{
 		$this->container = $container;
@@ -24,18 +21,15 @@ class RendererTransformer extends AbstractTransformer
 	/**
 	 * Encode given data for response
 	 *
-	 * @param ApiRequest $request
-	 * @param ApiResponse $response
-	 * @param array $context
-	 * @return ApiResponse
+	 * @param mixed[] $context
 	 */
-	public function transform(ApiRequest $request, ApiResponse $response, array $context = [])
+	public function transform(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse
 	{
 		// Return immediately if context hasn't defined renderer
 		if (!isset($context['renderer'])) return $response;
 
 		// Fetch service
-		$service = $this->container->getByType($context['renderer'], FALSE);
+		$service = $this->container->getByType($context['renderer'], false);
 
 		if (!$service) {
 			throw new InvalidStateException(sprintf('Renderer "%s" is not registered in container', $context['renderer']));

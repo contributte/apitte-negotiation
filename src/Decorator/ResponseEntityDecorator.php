@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Decorator;
 
@@ -15,9 +15,6 @@ class ResponseEntityDecorator implements IDecorator
 	/** @var ContentNegotiation */
 	private $negotiation;
 
-	/**
-	 * @param ContentNegotiation $negotiation
-	 */
 	public function __construct(ContentNegotiation $negotiation)
 	{
 		$this->negotiation = $negotiation;
@@ -26,10 +23,9 @@ class ResponseEntityDecorator implements IDecorator
 	/**
 	 * @param ApiRequest|ServerRequestInterface $request
 	 * @param ApiResponse|ResponseInterface $response
-	 * @param array $context
-	 * @return ResponseInterface
+	 * @param mixed[] $context
 	 */
-	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = [])
+	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = []): ResponseInterface
 	{
 		// Skip if response is not our ApiResponse
 		if (!($response instanceof ApiResponse)) return $response;
@@ -37,7 +33,7 @@ class ResponseEntityDecorator implements IDecorator
 		// Skip if there's no entity and no $context, it does not make sence
 		// to negotiate response without entity.
 		// Except if there's exception in $context.
-		if ($response->getEntity() === NULL && empty($context)) return $response;
+		if ($response->getEntity() === null && $context === []) return $response;
 
 		return $this->negotiation->negotiate($request, $response, $context);
 	}

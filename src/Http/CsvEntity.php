@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace Apitte\Negotiation\Http;
 
@@ -35,12 +35,9 @@ class CsvEntity extends AbstractEntity
 		return $this;
 	}
 
-	/**
-	 * @return void
-	 */
-	private function update()
+	private function update(): void
 	{
-		$this->setData(empty($this->header) ? $this->rows : array_merge([$this->header], $this->rows));
+		$this->setData($this->header === [] ? $this->rows : array_merge([$this->header], $this->rows));
 	}
 
 }
