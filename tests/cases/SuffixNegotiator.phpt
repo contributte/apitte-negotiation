@@ -10,6 +10,7 @@ use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use Apitte\Core\Schema\Endpoint;
+use Apitte\Core\Schema\EndpointHandler;
 use Apitte\Core\Schema\EndpointNegotiation;
 use Apitte\Negotiation\Http\ArrayEntity;
 use Apitte\Negotiation\SuffixNegotiator;
@@ -43,14 +44,15 @@ test(function (): void {
 test(function (): void {
 	$negotiation = new SuffixNegotiator(['json' => new JsonTransformer()]);
 
-	$enpoint = new Endpoint();
-	$enpoint->addNegotiation($en = new EndpointNegotiation());
-	$en->setSuffix('.json');
+	$handler = new EndpointHandler('class', 'method');
+
+	$endpoint = new Endpoint($handler);
+	$endpoint->addNegotiation($en = new EndpointNegotiation('.json'));
 
 	$request = new ApiRequest(Psr7ServerRequestFactory::fromSuperGlobal()->withNewUri('https://contributte.org/foo.json'));
 	$response = new ApiResponse(Psr7ResponseFactory::fromGlobal());
 	$response = $response->withEntity(ArrayEntity::from(['foo' => 'bar']))
-		->withEndpoint($enpoint);
+		->withEndpoint($endpoint);
 
 	// 2# Negotiate response (PSR7 body contains encoded json data)
 	$res = $negotiation->negotiate($request, $response);
