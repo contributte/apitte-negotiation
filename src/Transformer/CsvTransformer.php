@@ -2,6 +2,8 @@
 
 namespace Apitte\Negotiation\Transformer;
 
+use Apitte\Core\Exception\Api\ClientErrorException;
+use Apitte\Core\Exception\Api\ServerErrorException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use Throwable;
@@ -25,15 +27,21 @@ class CsvTransformer extends AbstractTransformer
 
 	protected function transformException(Throwable $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
-		$content = sprintf('Exception occurred with message "%s"', $exception->getMessage());
+		$code = $exception->getCode();
+		if ($exception instanceof ClientErrorException || $exception instanceof ServerErrorException) {
+			$message = $exception->getMessage();
+		} else {
+			$code = $code < 400 || $code > 600 ? 500 : $code;
+			$message = $this->debug ? $exception->getMessage() : 'Application encountered an internal error. Please try again later.';
+		}
+
+		$content = sprintf('Exception occurred with message "%s"', $message);
 		$response->getBody()->write($content);
 
 		// Setup content type
-		$response = $response
-			->withStatus(500)
+		return $response
+			->withStatus($code)
 			->withHeader('Content-Type', 'text/plain');
-
-		return $response;
 	}
 
 	protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
@@ -42,10 +50,8 @@ class CsvTransformer extends AbstractTransformer
 		$response->getBody()->write($content);
 
 		// Setup content type
-		$response = $response
+		return $response
 			->withHeader('Content-Type', 'text/plain');
-
-		return $response;
 	}
 
 	/**
