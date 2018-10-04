@@ -14,42 +14,10 @@ use Throwable;
 class JsonUnifyTransformer extends AbstractTransformer
 {
 
-	public const
-		DEFAULT_SUCCESS_CODE = 'success',
-		DEFAULT_CLIENT_ERROR_CODE = 'error.client',
-		DEFAULT_SERVER_ERROR_CODE = 'error.server',
-		DEFAULT_EXCEPTION_CODE = 'error';
-
-	/** @var mixed[] */
-	protected $options = [
-		'codes' => [
-			self::DEFAULT_SUCCESS_CODE => 200,
-			self::DEFAULT_CLIENT_ERROR_CODE => 400,
-			self::DEFAULT_SERVER_ERROR_CODE => 500,
-			self::DEFAULT_EXCEPTION_CODE => 555,
-		],
-	];
-
 	// Statuses
 	public const
 		STATUS_SUCCESS = 'success',
 		STATUS_ERROR = 'error';
-
-	/**
-	 * @param mixed[] $options
-	 */
-	public function __construct(array $options = [])
-	{
-		$this->options = array_merge($this->options, $options);
-	}
-
-	/**
-	 * @param mixed $value
-	 */
-	public function setOption(string $key, $value): void
-	{
-		$this->options[$key] = $value;
-	}
 
 	/**
 	 * Encode given data for response
@@ -75,10 +43,8 @@ class JsonUnifyTransformer extends AbstractTransformer
 		$response->getBody()->write($content);
 
 		// Setup content type
-		$response = $response
+		return $response
 			->withHeader('Content-Type', 'application/json');
-
-		return $response;
 	}
 
 	protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
@@ -91,10 +57,8 @@ class JsonUnifyTransformer extends AbstractTransformer
 		$response->getBody()->write($content);
 
 		// Setup content type
-		$response = $response
+		return $response
 			->withHeader('Content-Type', 'application/json');
-
-		return $response;
 	}
 
 	protected function unifyResponse(ApiRequest $request, ApiResponse $response): ApiResponse
@@ -119,7 +83,7 @@ class JsonUnifyTransformer extends AbstractTransformer
 	{
 		// Setup status code only if it's not set already
 		if (!$response->getStatusCode()) {
-			$response = $response->withStatus($this->options['codes'][self::DEFAULT_SUCCESS_CODE]);
+			$response = $response->withStatus(200);
 		}
 
 		return $response
@@ -131,18 +95,14 @@ class JsonUnifyTransformer extends AbstractTransformer
 
 	protected function processClientError(ClientErrorException $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
-		// Analyze status code
-		$code = $exception->getCode();
-		$code = $code < 400 || $code > 500 ? $this->options['codes'][self::DEFAULT_CLIENT_ERROR_CODE] : $code;
-
 		$data = [
-			'code' => $code,
+			'code' => $exception->getCode(),
 			'error' => $exception->getMessage(),
 			'context' => $exception->getContext(),
 		];
 
 		return $response
-			->withStatus($code)
+			->withStatus($exception->getCode())
 			->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
 				'status' => self::STATUS_ERROR,
 				'data' => $data,
@@ -151,12 +111,8 @@ class JsonUnifyTransformer extends AbstractTransformer
 
 	protected function processServerError(ServerErrorException $exception, ApiRequest $request, ApiResponse $response): ApiResponse
 	{
-		// Analyze status code
-		$code = $exception->getCode();
-		$code = $code < 500 || $code > 600 ? $this->options['codes'][self::DEFAULT_SERVER_ERROR_CODE] : $code;
-
 		return $response
-			->withStatus($code)
+			->withStatus($exception->getCode())
 			->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
 				'status' => self::STATUS_ERROR,
 				'message' => $exception->getMessage(),
@@ -167,13 +123,13 @@ class JsonUnifyTransformer extends AbstractTransformer
 	{
 		// Analyze status code
 		$code = $exception->getCode();
-		$code = $code < 400 || $code > 600 ? $this->options['codes'][self::DEFAULT_EXCEPTION_CODE] : $code;
+		$code = $code < 400 || $code > 600 ? 500 : $code;
 
 		return $response
 			->withStatus($code)
 			->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
 				'status' => self::STATUS_ERROR,
-				'message' => $exception->getMessage(),
+				'message' => $this->debug ? $exception->getMessage() : 'Application encountered an internal error. Please try again later.',
 			]));
 	}
 

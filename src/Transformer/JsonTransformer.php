@@ -21,6 +21,11 @@ class JsonTransformer extends AbstractTransformer
 		if (isset($context['exception'])) {
 			// Convert exception to json
 			$content = Json::encode($this->extractException($request, $response, $context));
+			if ($context['exception'] instanceof ClientErrorException || $context['exception'] instanceof ServerErrorException) {
+				$response = $response->withStatus($context['exception']->getCode());
+			} else {
+				$response = $response->withStatus(500);
+			}
 		} else {
 			// Convert data to array to json
 			$content = Json::encode($this->extractData($request, $response, $context));
@@ -29,10 +34,8 @@ class JsonTransformer extends AbstractTransformer
 		$response->getBody()->write($content);
 
 		// Setup content type
-		$response = $response
+		return $response
 			->withHeader('Content-Type', 'application/json');
-
-		return $response;
 	}
 
 	/**
@@ -51,14 +54,13 @@ class JsonTransformer extends AbstractTransformer
 	protected function extractException(ApiRequest $request, ApiResponse $response, array $context): array
 	{
 		$exception = $context['exception'];
-		$data = ['exception' => $exception->getMessage()];
+		$data = [];
 
-		if ($exception instanceof ClientErrorException) {
+		if ($exception instanceof ClientErrorException || $exception instanceof ServerErrorException) {
+			$data['exception'] = $exception->getMessage();
 			$data['context'] = $exception->getContext();
-		}
-
-		if ($exception instanceof ServerErrorException) {
-			$data['context'] = $exception->getContext();
+		} else {
+			$data['exception'] = $this->debug ? $exception->getMessage() : 'Application encountered an internal error. Please try again later.';
 		}
 
 		return $data;

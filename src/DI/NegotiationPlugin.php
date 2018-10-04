@@ -6,6 +6,7 @@ use Apitte\Core\Decorator\IDecorator;
 use Apitte\Core\DI\ApiExtension;
 use Apitte\Core\DI\Helpers;
 use Apitte\Core\DI\Plugin\AbstractPlugin;
+use Apitte\Core\DI\Plugin\CoreDecoratorPlugin;
 use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
@@ -41,8 +42,8 @@ class NegotiationPlugin extends AbstractPlugin
 	 */
 	public function loadPluginConfiguration(): void
 	{
-		if (!$this->compiler->getPlugin('decorator')) {
-			throw new InvalidStateException(sprintf('Plugin "CoreDecoratorPlugin" must be enabled'));
+		if (!$this->compiler->getPlugin(CoreDecoratorPlugin::PLUGIN_NAME)) {
+			throw new InvalidStateException(sprintf('Plugin "%s" must be enabled', CoreDecoratorPlugin::class));
 		}
 
 		$builder = $this->getContainerBuilder();
@@ -51,21 +52,25 @@ class NegotiationPlugin extends AbstractPlugin
 
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
+			->addSetup('setDebugMode', [$globalConfig['debug']])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.csv'))
 			->setFactory(CsvTransformer::class)
+			->addSetup('setDebugMode', [$globalConfig['debug']])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
+			->addSetup('setDebugMode', [$globalConfig['debug']])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
 			->setFactory(RendererTransformer::class)
+			->addSetup('setDebugMode', [$globalConfig['debug']])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
 			->setAutowired(false);
 
@@ -94,10 +99,12 @@ class NegotiationPlugin extends AbstractPlugin
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
+				->addSetup('setDebugMode', [$globalConfig['debug']])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
 				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
+				->addSetup('setDebugMode', [$globalConfig['debug']])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 				->setAutowired(false);
 		}
