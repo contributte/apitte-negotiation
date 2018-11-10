@@ -41,12 +41,13 @@ class SuffixNegotiator implements INegotiator
 	 */
 	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
 	{
-		if (!$this->transformers) {
+		if ($this->transformers === []) {
 			throw new InvalidStateException('Please add at least one transformer');
 		}
 
 		// Early return if there's no endpoint
-		if (!($endpoint = $response->getEndpoint())) return null;
+		$endpoint = $response->getEndpoint();
+		if ($endpoint === null) return null;
 
 		// Get negotiations
 		$negotiations = $endpoint->getNegotiations();
@@ -61,7 +62,7 @@ class SuffixNegotiator implements INegotiator
 				$transformer = ltrim($suffix, '.');
 
 				// If callback is defined -> process to callback transformer
-				if ($negotiation->getRenderer()) {
+				if ($negotiation->getRenderer() !== null) {
 					$transformer = INegotiator::RENDERER;
 					$context['renderer'] = $negotiation->getRenderer();
 				}

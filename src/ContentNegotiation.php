@@ -41,13 +41,13 @@ class ContentNegotiation
 	/**
 	 * @param mixed[] $context
 	 */
-	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ?ApiResponse
+	public function negotiate(ApiRequest $request, ApiResponse $response, array $context = []): ApiResponse
 	{
 		// Should we skip negotiation?
 		if ($request->getAttribute(self::ATTR_SKIP, false) === true) return $response;
 
 		// Validation
-		if (!$this->negotiators) {
+		if ($this->negotiators === []) {
 			throw new InvalidStateException('At least one response negotiator is required');
 		}
 

@@ -9,8 +9,7 @@
     <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
         <properties>
             <property name="rootNamespaces" type="array" value="
-                src=>Apitte\Negotiation,
-                tests/fixtures=>Tests\Fixtures
+                src=>Apitte\Negotiation
             "/>
         </properties>
     </rule>

@@ -72,7 +72,7 @@ class CsvTransformer extends AbstractTransformer
 		$data = fread($fp, 1048576);
 		fclose($fp);
 
-		return rtrim($data, "\n");
+		return rtrim((string) $data, "\n");
 	}
 
 }
