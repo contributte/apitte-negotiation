@@ -42,7 +42,7 @@ class NegotiationPlugin extends AbstractPlugin
 	 */
 	public function loadPluginConfiguration(): void
 	{
-		if (!$this->compiler->getPlugin(CoreDecoratorPlugin::PLUGIN_NAME)) {
+		if ($this->compiler->getPlugin(CoreDecoratorPlugin::PLUGIN_NAME) === null) {
 			throw new InvalidStateException(sprintf('Plugin "%s" must be enabled', CoreDecoratorPlugin::class));
 		}
 
@@ -133,7 +133,7 @@ class NegotiationPlugin extends AbstractPlugin
 		$definitions = $builder->findByTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG);
 
 		// Ensure we have at least 1 service
-		if (!$definitions) {
+		if ($definitions === []) {
 			throw new InvalidStateException(sprintf('No services with tag "%s"', ApiExtension::NEGOTIATION_NEGOTIATOR_TAG));
 		}
 
@@ -158,7 +158,7 @@ class NegotiationPlugin extends AbstractPlugin
 		$definitions = $builder->findByTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG);
 
 		// Ensure we have at least 1 service
-		if (!$definitions) {
+		if ($definitions === []) {
 			throw new InvalidStateException(sprintf('No services with tag "%s"', ApiExtension::NEGOTIATION_TRANSFORMER_TAG));
 		}
 

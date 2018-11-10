@@ -1,4 +1,16 @@
 includes:
-	- temp/phpstan/vendor/phpstan/phpstan-strict-rules/rules.neon
+	- temp/phpstan/vendor/phpstan/phpstan-deprecation-rules/rules.neon
 	- temp/phpstan/vendor/phpstan/phpstan-nette/extension.neon
 	- temp/phpstan/vendor/phpstan/phpstan-nette/rules.neon
+	- temp/phpstan/vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+	ignoreErrors:
+		# Typecasting to resource is too complicated
+		- '#^Parameter \#1 \$fp of function (fputcsv|rewind|fread|fclose|rtrim) expects resource, resource\|false given\.$#'
+
+		# Better not to solve that
+		- '#^Only booleans are allowed in a negated boolean, int given\.$#'
+
+		# Phpstan bug
+		- '#^Parameter \#1 \$request of method Apitte\\Negotiation\\ContentNegotiation\:\:negotiate\(\) expects Apitte\\Core\\Http\\ApiRequest, Psr\\Http\\Message\\ServerRequestInterface given\.$#'

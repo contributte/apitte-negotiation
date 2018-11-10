@@ -2,13 +2,12 @@
 
 namespace Apitte\Negotiation\Http;
 
-use Exception;
 use Throwable;
 
 class ExceptionEntity extends AbstractEntity
 {
 
-	/** @var Exception */
+	/** @var Throwable */
 	protected $exception;
 
 	public function __construct(Throwable $exception)
