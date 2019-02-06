@@ -15,6 +15,7 @@ class ScalarEntity extends AbstractEntity
 
 	/**
 	 * @param mixed $value
+	 * @return static
 	 */
 	public static function from($value): self
 	{

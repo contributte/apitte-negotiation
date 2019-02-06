@@ -19,6 +19,7 @@ class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 
 	/**
 	 * @param mixed[] $data
+	 * @return static
 	 */
 	public static function from(array $data): self
 	{

@@ -29,6 +29,9 @@ class MappingEntity extends AbstractEntity
 		return $this->entity;
 	}
 
+	/**
+	 * @return static
+	 */
 	public static function from(IResponseEntity $entity): self
 	{
 		return new static($entity);

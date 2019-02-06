@@ -12,6 +12,9 @@ class ObjectEntity extends AbstractEntity
 		parent::__construct($data);
 	}
 
+	/**
+	 * @return static
+	 */
 	public static function from(stdClass $data): self
 	{
 		return new static($data);
