@@ -58,7 +58,9 @@ class JsonTransformer extends AbstractTransformer
 
 		if ($exception instanceof ClientErrorException || $exception instanceof ServerErrorException) {
 			$data['exception'] = $exception->getMessage();
-			$data['context'] = $exception->getContext();
+			if ($exception->getContext() !== null) {
+				$data['context'] = $exception->getContext();
+			}
 		} else {
 			$data['exception'] = $this->debug ? $exception->getMessage() : 'Application encountered an internal error. Please try again later.';
 		}
