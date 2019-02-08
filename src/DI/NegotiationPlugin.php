@@ -11,7 +11,6 @@ use Apitte\Core\DI\Plugin\PluginCompiler;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
 use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
-use Apitte\Negotiation\Decorator\ThrowExceptionDecorator;
 use Apitte\Negotiation\DefaultNegotiator;
 use Apitte\Negotiation\FallbackNegotiator;
 use Apitte\Negotiation\SuffixNegotiator;
@@ -28,7 +27,6 @@ class NegotiationPlugin extends AbstractPlugin
 	/** @var mixed[] */
 	protected $defaults = [
 		'unification' => false,
-		'catchException' => false,
 	];
 
 	public function __construct(PluginCompiler $compiler)
@@ -107,12 +105,6 @@ class NegotiationPlugin extends AbstractPlugin
 				->addSetup('setDebugMode', [$globalConfig['debug']])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 				->setAutowired(false);
-		}
-
-		if ($config['catchException'] === false && $globalConfig['debug'] === true) {
-			$builder->addDefinition($this->prefix('decorator.throwException'))
-				->setFactory(ThrowExceptionDecorator::class)
-				->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 99, 'type' => IDecorator::ON_DISPATCHER_EXCEPTION]);
 		}
 	}
 

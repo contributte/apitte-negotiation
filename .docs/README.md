@@ -35,28 +35,24 @@ api:
     plugins: 
         Apitte\Negotiation\DI\NegotiationPlugin:
             unification: false
-            catchException: false
 ```
 
-- `unification` - Change default `JsonTransformer` to `JsonUnifyTransform`. You will see in next capter.
-- `catchException` - Great for front-end developers, convert (catch) Tracy-exception to JSON. 
+- `unification` - Change default `JsonTransformer` to `JsonUnifyTransform`. You will see in next chapter.
 
 ## Negotiation
 
 This plugin adds new features. They are called decorators, negotiators and transformers.
 
-Basically, decorator listen on specic event and can modify incomming request or outgoing response directly or via negotiator.
+Basically, decorator listen on specific event and can modify incoming request or outgoing response directly or via negotiator.
 The negotiator has the handling logic, if request has an appropriate extension or header and call the transformer.
-All modifications (trasforming data from A to B) is done in transformer, e.q. transform array to json.    
+All modifications (transforming data from A to B) is done in transformer, e.q. transform array to json.
 
 ### Decorators
 
-There are 2 predefined decorators:
+There is single predefined decorator:
 
-- `ResponseEntityDecorator` - It listens on 2 events, after dispatching and after exception. It means this decorator is trigged when the response is returned from controller 
-or if some exception is throwed.
-
-- `ThrowExceptionDecorator` - This decorator is appliable only in debug mode. It just diplays the exception for you.
+- `ResponseEntityDecorator` - It listens on 2 events, after dispatching and after exception. It means this decorator is triggered when the response is returned from controller
+or if some exception is thrown.
 
 ### Negotiators
 
@@ -81,7 +77,7 @@ These classes transform data formats from A to B.
 - `CsvTransform` - Transform `entity` -> `csv`, but the entity must have an appropriate data.
 
 - `RendererTransformer` - This is special transformer. If annotation `@Negotiation(renderer = App\Some\Class` has provided renderer attribute, 
-this transformer recieve that renderer, `entity` -> `renderer(entity)`.
+this transformer receive that renderer, `entity` -> `renderer(entity)`.
 
 ## Playground
 
