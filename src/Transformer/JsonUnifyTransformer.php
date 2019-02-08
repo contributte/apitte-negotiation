@@ -98,8 +98,11 @@ class JsonUnifyTransformer extends AbstractTransformer
 		$data = [
 			'code' => $exception->getCode(),
 			'error' => $exception->getMessage(),
-			'context' => $exception->getContext(),
 		];
+
+		if ($exception->getContext() !== null) {
+			$data['context'] = $exception->getContext();
+		}
 
 		return $response
 			->withStatus($exception->getCode())
