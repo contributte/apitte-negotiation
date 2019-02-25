@@ -10,7 +10,7 @@
 [![Downloads this Month](https://img.shields.io/packagist/dm/apitte/negotiation.svg?style=flat-square)](https://packagist.org/packages/apitte/negotiation)
 [![Downloads total](https://img.shields.io/packagist/dt/apitte/negotiation.svg?style=flat-square)](https://packagist.org/packages/apitte/negotiation)
 [![Latest stable](https://img.shields.io/packagist/v/apitte/negotiation.svg?style=flat-square)](https://packagist.org/packages/apitte/negotiation)
-[![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
+[![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat-square)](https://github.com/phpstan/phpstan)
 
 ## Discussion / Help
 
