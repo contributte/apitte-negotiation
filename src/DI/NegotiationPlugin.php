@@ -2,7 +2,6 @@
 
 namespace Apitte\Negotiation\DI;
 
-use Apitte\Core\Decorator\IDecorator;
 use Apitte\Core\DI\ApiExtension;
 use Apitte\Core\DI\Helpers;
 use Apitte\Core\DI\Plugin\AbstractPlugin;
@@ -13,8 +12,10 @@ use Apitte\Negotiation\ContentNegotiation;
 use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
 use Apitte\Negotiation\DefaultNegotiator;
 use Apitte\Negotiation\FallbackNegotiator;
+use Apitte\Negotiation\INegotiator;
 use Apitte\Negotiation\SuffixNegotiator;
 use Apitte\Negotiation\Transformer\CsvTransformer;
+use Apitte\Negotiation\Transformer\ITransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Apitte\Negotiation\Transformer\JsonUnifyTransformer;
 use Apitte\Negotiation\Transformer\RendererTransformer;
@@ -89,7 +90,7 @@ class NegotiationPlugin extends AbstractPlugin
 
 		$builder->addDefinition($this->prefix('decorator.response'))
 			->setFactory(ResponseEntityDecorator::class)
-			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500, 'type' => [IDecorator::ON_HANDLER_AFTER, IDecorator::ON_DISPATCHER_EXCEPTION]]);
+			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500]);
 
 		if ($config['unification'] === true) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
@@ -113,46 +114,31 @@ class NegotiationPlugin extends AbstractPlugin
 	 */
 	public function beforePluginCompile(): void
 	{
-		$this->compileTaggedNegotiators();
-		$this->compileTaggedTransformers();
+		$this->compileNegotiators();
+		$this->compileTransformers();
 	}
 
-	protected function compileTaggedNegotiators(): void
+	protected function compileNegotiators(): void
 	{
 		$builder = $this->getContainerBuilder();
 
 		// Find all definitions by tag
-		$definitions = $builder->findByTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG);
-
-		// Ensure we have at least 1 service
-		if ($definitions === []) {
-			throw new InvalidStateException(sprintf('No services with tag "%s"', ApiExtension::NEGOTIATION_NEGOTIATOR_TAG));
-		}
+		$definitions = $builder->findByType(INegotiator::class);
 
 		// Sort by priority
-		$definitions = Helpers::sort($definitions);
+		$definitions = Helpers::sortByPriorityInTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, $definitions);
 
-		// Find all services by names
-		$negotiators = Helpers::getDefinitions($definitions, $builder);
-
-		// Obtain negotiation
-		$negotiation = $builder->getDefinition($this->prefix('negotiation'));
-
-		// Set services as argument
-		$negotiation->setArguments([$negotiators]);
+		// Setup negotiators
+		$builder->getDefinition($this->prefix('negotiation'))
+			->setArguments([$definitions]);
 	}
 
-	protected function compileTaggedTransformers(): void
+	protected function compileTransformers(): void
 	{
 		$builder = $this->getContainerBuilder();
 
 		// Find all definitions by tag
-		$definitions = $builder->findByTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG);
-
-		// Ensure we have at least 1 service
-		if ($definitions === []) {
-			throw new InvalidStateException(sprintf('No services with tag "%s"', ApiExtension::NEGOTIATION_TRANSFORMER_TAG));
-		}
+		$definitions = $builder->findByType(ITransformer::class);
 
 		// Init temporary array for services
 		$transformers = [
@@ -160,15 +146,16 @@ class NegotiationPlugin extends AbstractPlugin
 			'fallback' => null,
 		];
 
-		// Find all services by names
-		foreach ($definitions as $name => $tag) {
+		foreach ($definitions as $definition) {
+			$tag = $definition->getTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG);
+
 			if (isset($tag['suffix'])) {
 				// Find suffix transformer service
-				$transformers['suffix'][$tag['suffix']] = $builder->getDefinition($name);
+				$transformers['suffix'][$tag['suffix']] = $definition;
 			}
 
 			if (isset($tag['fallback'])) {
-				$transformers['fallback'] = $builder->getDefinition($name);
+				$transformers['fallback'] = $definition;
 			}
 		}
 
