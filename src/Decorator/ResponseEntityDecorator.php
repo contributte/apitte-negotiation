@@ -2,14 +2,16 @@
 
 namespace Apitte\Negotiation\Decorator;
 
-use Apitte\Core\Decorator\IDecorator;
+use Apitte\Core\Decorator\IErrorDecorator;
+use Apitte\Core\Decorator\IResponseDecorator;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\ContentNegotiation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
-class ResponseEntityDecorator implements IDecorator
+class ResponseEntityDecorator implements IResponseDecorator, IErrorDecorator
 {
 
 	/** @var ContentNegotiation */
@@ -21,21 +23,34 @@ class ResponseEntityDecorator implements IDecorator
 	}
 
 	/**
-	 * @param ApiRequest|ServerRequestInterface $request
-	 * @param ApiResponse|ResponseInterface $response
-	 * @param mixed[] $context
+	 * @param ApiRequest $request
 	 */
-	public function decorate(ServerRequestInterface $request, ResponseInterface $response, array $context = []): ResponseInterface
+	public function decorateError(ServerRequestInterface $request, ResponseInterface $response, Throwable $error): ResponseInterface
 	{
 		// Skip if response is not our ApiResponse
-		if (!($response instanceof ApiResponse)) return $response;
+		if (!($response instanceof ApiResponse)) {
+			return $response;
+		}
 
-		// Skip if there's no entity and no $context, it does not make sence
-		// to negotiate response without entity.
-		// Except if there's exception in $context.
-		if ($response->getEntity() === null && $context === []) return $response;
+		return $this->negotiation->negotiate($request, $response, ['exception' => $error]);
+	}
 
-		return $this->negotiation->negotiate($request, $response, $context);
+	/**
+	 * @param ApiRequest $request
+	 */
+	public function decorateResponse(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+	{
+		// Skip if response is not our ApiResponse
+		if (!($response instanceof ApiResponse)) {
+			return $response;
+		}
+
+		// Cannot negotiate response without entity
+		if ($response->getEntity() === null) {
+			return $response;
+		}
+
+		return $this->negotiation->negotiate($request, $response);
 	}
 
 }

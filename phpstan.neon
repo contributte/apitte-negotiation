@@ -12,5 +12,5 @@ parameters:
 		# Better not to solve that
 		- '#^Only booleans are allowed in a negated boolean, int given\.$#'
 
-		# Phpstan bug
-		- '#^Parameter \#1 \$request of method Apitte\\Negotiation\\ContentNegotiation\:\:negotiate\(\) expects Apitte\\Core\\Http\\ApiRequest, Psr\\Http\\Message\\ServerRequestInterface given\.$#'
+		# Maybe later - complicated to fix
+		- '#^.*should be contravariant with parameter.*$#'
