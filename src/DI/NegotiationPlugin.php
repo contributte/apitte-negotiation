@@ -64,7 +64,7 @@ class NegotiationPlugin extends AbstractPlugin
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
 			->addSetup('setDebugMode', [$globalConfig['debug']])
-			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
+			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
@@ -99,7 +99,7 @@ class NegotiationPlugin extends AbstractPlugin
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
 				->addSetup('setDebugMode', [$globalConfig['debug']])
-				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => '*'])
+				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
@@ -154,7 +154,7 @@ class NegotiationPlugin extends AbstractPlugin
 				$transformers['suffix'][$tag['suffix']] = $definition;
 			}
 
-			if (isset($tag['fallback'])) {
+			if (isset($tag['fallback']) && $tag['fallback'] === true) {
 				$transformers['fallback'] = $definition;
 			}
 		}

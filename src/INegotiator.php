@@ -9,7 +9,6 @@ interface INegotiator
 {
 
 	public const RENDERER = '#';
-	public const FALLBACK = '*';
 
 	/**
 	 * @param mixed[] $context
