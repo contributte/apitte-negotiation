@@ -1,86 +1,195 @@
-# Apitte/Negotiation
+# Apitte Negotiation
 
-## Content
+Content negotiation for [Apitte](https://github.com/apitte/negotiation).
 
-- [Installation - how to register a plugin](#plugin)
-- [Configuration - how to configure](#configuration)
-- [Negotiation - content negotiation](#negotiation)
-- [Playground - real examples](#playground)
+Transform response entity into response with unified format in dependence on `Accept` header and uri path suffix `/api/v1/users(.json|.xml)`
 
-## Plugin
+## Setup
 
-This plugin requires [Apitte/Core](https://github.com/apitte/core) library.
+First of all, setup [core](https://github.com/apitte/core) package and enable `CoreDecoratorPlugin`.
 
-At first you have to register the main extension.
+Install and register negotiation plugin
+
+```bash
+composer require apitte/negotiation
+```
 
 ```yaml
-extensions:
-    api: Apitte\Core\DI\ApiExtension
-```
-
-Secondly, add the `NegotiationPlugin` plugin.
-
-```yaml
-api:
-    plugins:
-        Apitte\Negotiation\DI\NegotiationPlugin:
-```
-
-## Configuration
-
-You can configure a few options.
-
-```
 api:
     plugins: 
         Apitte\Negotiation\DI\NegotiationPlugin:
-            unification: false
 ```
 
-- `unification` - Change default `JsonTransformer` to `JsonUnifyTransform`. You will see in next chapter.
+## Response
 
-## Negotiation
+Instead of response return entity from endpoint so transformers could handle transformation for you.
 
-This plugin adds new features. They are called decorators, negotiators and transformers.
+```php
+namespace App\Api\V1\Controllers;
 
-Basically, decorator listen on specific event and can modify incoming request or outgoing response directly or via negotiator.
-The negotiator has the handling logic, if request has an appropriate extension or header and call the transformer.
-All modifications (transforming data from A to B) is done in transformer, e.q. transform array to json.
+use Apitte\Core\Annotation\Controller\Controller;
+use Apitte\Core\Annotation\Controller\ControllerPath;
+use Apitte\Core\Annotation\Controller\Method;
+use Apitte\Core\Annotation\Controller\Path;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Negotiation\Http\ArrayEntity;
 
-### Decorators
+/**
+ * @Controller()
+ * @ControllerPath("/users")
+ */
+class UsersController extends BaseV1Controller
+{
 
-There is single predefined decorator:
+    /**
+     * @Path("/")
+     * @Method("GET")
+     */
+    public function index(ApiRequest $request, ApiResponse $response): ArrayEntity
+    {
+        $data = [
+            [
+                'id' => 1,
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'emailAddress' => 'john@doe.com',
+            ],
+            [
+                'id' => 2,
+                'firstName' => 'Elon',
+                'lastName' => 'Musk',
+                'emailAddress' => 'elon.musk@spacex.com',
+            ],
+        ];
 
-- `ResponseEntityDecorator` - It listens on 2 events, after dispatching and after exception. It means this decorator is triggered when the response is returned from controller
-or if some exception is thrown.
+        return ArrayEntity::from($data);
+    }
+
+}
+```
+
+## Entities
+
+Value objects which are used to create response
+
+- `ArrayEntity` - create from array
+- `ObjectEntity` - create from stdClass
+- `ScalarEntity` - create from raw data
+
+## Error handling
+
+Negotiations are implemented through an `IErrorDecorator`, which have higher priority than internal `ErrorHandler`
+so response is created from exception in an `ITransformer` and `ErrorHandler` only log that exception (if you use `PsrLogErrorHandler`)
 
 ### Negotiators
 
-The main goal of the negotiator is determine if given request/response apply all conditions and call the transformer.
+Handle request and based on path suffix or request headers call appropriate transformer.
 
-There are 3 predefined transformers:
+`SuffixNegotiator`
 
-- `SuffixNegotiator` - It's called if the URI ends with the given suffix, e.q `example.com/users.json` -> `json`.
+- used for request with path suffix like `/api/v1/users.json` -> transformer for `json` suffix is used
 
-- `DefaultNegotiator` - It's called when the route is matched and annotation `@Negotiation(default = true)` has provided default attribute. 
+`DefaultNegotiator`
 
-- `FallbackNegotiator` - The last one transformer. It's called when no other negotiator is matched.
+- called when none other transform
+- require annotation `@Negotiation(default = true, suffix = "json")` defined on endpoint - transformer for given suffix is looked for
+
+`FallbackNegotiator`
+
+- used last if no other negotiator transformed response
+- uses json transformer by default
 
 ### Transformers
 
-These classes transform data formats from A to B.
+Transformers convert entities and exceptions into response.
 
-- `JsonTransform` - The most used transformer, `entity` -> `json`.
+`JsonTransformer`
 
-- `JsonUnifyTransform` - Applied when the `unification` is enabled. Transformer, `entity` -> `json` (with formatted response).
+  - transform into json
 
-- `CsvTransform` - Transform `entity` -> `csv`, but the entity must have an appropriate data.
+`JsonUnifyTransformer`
 
-- `RendererTransformer` - This is special transformer. If annotation `@Negotiation(renderer = App\Some\Class` has provided renderer attribute, 
-this transformer receive that renderer, `entity` -> `renderer(entity)`.
+  - transform into json with unified format
 
-## Playground
+```yaml
+api:
+    plugins: 
+        Apitte\Negotiation\DI\NegotiationPlugin:
+            unification: true
+```
 
-I've made a repository with full applications for education.
+`CsvTransformer`
 
-Take a look: https://github.com/apitte/playground
+  - transform into csv
+  - known limitation: data need to be a flat structure
+
+#### Implementing transformer
+
+```yaml
+services:
+    - factory: App\Api\Transformer\XmlTransformer
+      tags: [apitte.negotiator.transformer: [suffix: xml, fallback: true]]
+```
+
+- register transformer for suffix `xml`, used for uris like `/api/v1/users.xml`
+- if `fallback: true` is defined and none of transformers matched then use that transformer
+
+```php
+namespace App\Api\Transformer;
+
+use Apitte\Core\Exception\ApiException;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Core\Http\ResponseAttributes;
+use Apitte\Negotiation\Http\ArrayEntity;
+use Apitte\Negotiation\Transformer\AbstractTransformer;
+use Throwable;
+
+class XmlTransformer extends AbstractTransformer
+{
+
+    /**
+     * Encode given data for response
+     *
+     * @param mixed[] $context
+     */
+    public function transform(ApiRequest $request, ApiResponse $response, array $context = []) : ApiResponse
+    {
+        if (isset($context['exception'])) {
+            return $this->transformError($context['exception'], $request, $response);
+        }
+
+        return $this->transformResponse($request, $response);
+    }
+    
+    protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
+    {
+        $data = $this->getEntity($response)->getData();
+        $content = $this->dataToXmlString($data);
+        $response->getBody()->write($content);
+
+        return $response
+            ->withHeader('Content-Type', 'application/xml');
+    }
+    
+    protected function transformError(Throwable $error, ApiRequest $request, ApiResponse $response): ApiResponse
+    {
+    	if ($error instanceof ApiException) {
+    		$code = $error->getCode();
+    		$message = $error->getMessage();
+    	} else {
+    		$code = 500;
+    		$message = 'Application encountered an internal error. Please try again later.';
+    	}
+
+        return $response
+            ->withStatus($code)
+            ->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
+                'status' => 'error',
+                'message' => $message,
+            ]));
+    }
+
+}
+```

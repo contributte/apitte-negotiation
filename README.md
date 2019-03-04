@@ -1,8 +1,8 @@
-# Apitte\Negotiation
+# Apitte Negotiation
 
-:wrench: Content-Negotiation for Apitte.
+Content negotiation for [Apitte](https://github.com/apitte/negotiation).
 
------
+Transform response entity into response with unified format in dependence on `Accept` header and uri path suffix `/api/v1/users(.json|.xml)`
 
 [![Build Status](https://img.shields.io/travis/apitte/negotiation.svg?style=flat-square)](https://travis-ci.org/apitte/negotiation)
 [![Code coverage](https://img.shields.io/coveralls/apitte/negotiation.svg?style=flat-square)](https://coveralls.io/r/apitte/negotiation)
@@ -16,12 +16,6 @@
 
 [![Join the chat](https://img.shields.io/gitter/room/apitte/apitte.svg?style=flat-square)](http://bit.ly/apittegitter)
 
-## Install
-
-```
-composer require apitte/negotiation
-```
-
 ## Version
 
 | State       | Version      | Branch   | PHP      | Composer                                        |
@@ -30,12 +24,14 @@ composer require apitte/negotiation
 | stable      | `^0.4.0`     | `master` | `>= 7.1` |                                                 |
 | stable      | `^0.3.0`     | `master` | `>= 5.6` |                                                 |
 
-## Overview
+## Documentation
 
-- [Installation - how to register a plugin](https://github.com/apitte/negotiation/tree/master/.docs#plugin)
-- [Configuration - how to configure](https://github.com/apitte/negotiation/tree/master/.docs#configuration)
-- [Negotiation - content negotiation](https://github.com/apitte/negotiation/tree/master/.docs#negotiation)
-- [Playground - real examples](https://github.com/apitte/negotiation/tree/master/.docs#playground)
+- [Setup](.docs/README.md#setup)
+- [Response](.docs/README.md#response)
+- [Entities](.docs/README.md#entities)
+- [Error handling](.docs/README.md#error-handling)
+- [Negotiators](.docs/README.md#negotiators)
+- [Transformers](.docs/README.md#transformers)
 
 ## Maintainers
 
@@ -60,12 +56,8 @@ composer require apitte/negotiation
   </tbody>
 </table>
 
------
+## Sponsoring
 
 <a href="https://github.com/tlapnet"><img  width="200" src="https://cdn.rawgit.com/f3l1x/xsource/2463efb7/assets/tlapdev.png"></a>
 
-The development is sponsored by [Tlapnet](http://www.tlapnet.cz) and a lot of coffees. Thank you guys! :+1:
-
------
-
-Thank you for testing, reporting and contributing.
+The development is sponsored by [Tlapnet](https://www.tlapnet.cz)
