@@ -27,7 +27,6 @@ Instead of response return entity from endpoint so transformers could handle tra
 ```php
 namespace App\Api\V1\Controllers;
 
-use Apitte\Core\Annotation\Controller\Controller;
 use Apitte\Core\Annotation\Controller\ControllerPath;
 use Apitte\Core\Annotation\Controller\Method;
 use Apitte\Core\Annotation\Controller\Path;
@@ -36,7 +35,6 @@ use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\Http\ArrayEntity;
 
 /**
- * @Controller()
  * @ControllerPath("/users")
  */
 class UsersController extends BaseV1Controller
