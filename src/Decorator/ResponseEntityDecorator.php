@@ -7,8 +7,6 @@ use Apitte\Core\Decorator\IResponseDecorator;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
 use Apitte\Negotiation\ContentNegotiation;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 class ResponseEntityDecorator implements IResponseDecorator, IErrorDecorator
@@ -22,29 +20,13 @@ class ResponseEntityDecorator implements IResponseDecorator, IErrorDecorator
 		$this->negotiation = $negotiation;
 	}
 
-	/**
-	 * @param ApiRequest $request
-	 */
-	public function decorateError(ServerRequestInterface $request, ResponseInterface $response, Throwable $error): ResponseInterface
+	public function decorateError(ApiRequest $request, ApiResponse $response, Throwable $error): ApiResponse
 	{
-		// Skip if response is not our ApiResponse
-		if (!($response instanceof ApiResponse)) {
-			return $response;
-		}
-
 		return $this->negotiation->negotiate($request, $response, ['exception' => $error]);
 	}
 
-	/**
-	 * @param ApiRequest $request
-	 */
-	public function decorateResponse(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+	public function decorateResponse(ApiRequest $request, ApiResponse $response): ApiResponse
 	{
-		// Skip if response is not our ApiResponse
-		if (!($response instanceof ApiResponse)) {
-			return $response;
-		}
-
 		// Cannot negotiate response without entity
 		if ($response->getEntity() === null) {
 			return $response;

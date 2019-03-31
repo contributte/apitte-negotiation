@@ -11,6 +11,3 @@ parameters:
 
 		# Better not to solve that
 		- '#^Only booleans are allowed in a negated boolean, int given\.$#'
-
-		# Maybe later - complicated to fix
-		- '#^.*should be contravariant with parameter.*$#'
