@@ -22,7 +22,7 @@ api:
 
 ## Response
 
-Instead of response return entity from endpoint so transformers could handle transformation for you.
+Instead of writing data into response body use `$response->withEntity($entity)` so transformers could handle transformation for you.
 
 ```php
 namespace App\Api\V1\Controllers;
@@ -44,9 +44,9 @@ class UsersController extends BaseV1Controller
      * @Path("/")
      * @Method("GET")
      */
-    public function index(ApiRequest $request, ApiResponse $response): ArrayEntity
+    public function index(ApiRequest $request, ApiResponse $response): ApiResponse
     {
-        $data = [
+        $entity = ArrayEntity::from([
             [
                 'id' => 1,
                 'firstName' => 'John',
@@ -59,9 +59,11 @@ class UsersController extends BaseV1Controller
                 'lastName' => 'Musk',
                 'emailAddress' => 'elon.musk@spacex.com',
             ],
-        ];
+        ]);
 
-        return ArrayEntity::from($data);
+        return $response
+            ->withStatus(ApiResponse::S200_OK)
+            ->withEntity($entity);
     }
 
 }
