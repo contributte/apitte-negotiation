@@ -20,8 +20,8 @@ Transform response entity into response with unified format in dependence on `Ac
 
 | State       | Version      | Branch   | PHP      | Composer                                        |
 |-------------|--------------|----------|----------|-------------------------------------------------|
-| development | `^0.5.0`     | `master` | `>= 7.1` | `minimum-stability: dev`, `prefer-stable: true` |
-| stable      | `^0.4.0`     | `master` | `>= 7.1` |                                                 |
+| development | `^0.6.0`     | `master` | `>= 7.1` | `minimum-stability: dev`, `prefer-stable: true` |
+| stable      | `^0.5.0`     | `master` | `>= 7.1` |                                                 |
 | stable      | `^0.3.0`     | `master` | `>= 5.6` |                                                 |
 
 ## Documentation
