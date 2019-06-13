@@ -4,9 +4,8 @@ namespace Apitte\Negotiation\DI;
 
 use Apitte\Core\DI\ApiExtension;
 use Apitte\Core\DI\Helpers;
-use Apitte\Core\DI\Plugin\AbstractPlugin;
 use Apitte\Core\DI\Plugin\CoreDecoratorPlugin;
-use Apitte\Core\DI\Plugin\PluginCompiler;
+use Apitte\Core\DI\Plugin\Plugin;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
 use Apitte\Negotiation\Decorator\ResponseEntityDecorator;
@@ -19,21 +18,27 @@ use Apitte\Negotiation\Transformer\ITransformer;
 use Apitte\Negotiation\Transformer\JsonTransformer;
 use Apitte\Negotiation\Transformer\JsonUnifyTransformer;
 use Apitte\Negotiation\Transformer\RendererTransformer;
+use Nette\DI\Definitions\ServiceDefinition;
+use Nette\Schema\Expect;
+use Nette\Schema\Schema;
+use stdClass;
 
-class NegotiationPlugin extends AbstractPlugin
+/**
+ * @property-read stdClass $config
+ */
+class NegotiationPlugin extends Plugin
 {
 
-	public const PLUGIN_NAME = 'negotiation';
-
-	/** @var mixed[] */
-	protected $defaults = [
-		'unification' => false,
-	];
-
-	public function __construct(PluginCompiler $compiler)
+	public static function getName(): string
 	{
-		parent::__construct($compiler);
-		$this->name = self::PLUGIN_NAME;
+		return 'negotiation';
+	}
+
+	protected function getConfigSchema(): Schema
+	{
+		return Expect::structure([
+			'unification' => Expect::bool(false),
+		]);
 	}
 
 	/**
@@ -41,35 +46,35 @@ class NegotiationPlugin extends AbstractPlugin
 	 */
 	public function loadPluginConfiguration(): void
 	{
-		if ($this->compiler->getPlugin(CoreDecoratorPlugin::PLUGIN_NAME) === null) {
+		if ($this->compiler->getPlugin(CoreDecoratorPlugin::getName()) === null) {
 			throw new InvalidStateException(sprintf('Plugin "%s" must be enabled', CoreDecoratorPlugin::class));
 		}
 
 		$builder = $this->getContainerBuilder();
-		$config = $this->getConfig();
+		$config = $this->config;
 		$globalConfig = $this->compiler->getExtension()->getConfig();
 
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig['debug']])
+			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.csv'))
 			->setFactory(CsvTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig['debug']])
+			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig['debug']])
+			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
 			->setFactory(RendererTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig['debug']])
+			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
 			->setAutowired(false);
 
@@ -92,18 +97,18 @@ class NegotiationPlugin extends AbstractPlugin
 			->setFactory(ResponseEntityDecorator::class)
 			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500]);
 
-		if ($config['unification'] === true) {
+		if ($config->unification) {
 			$builder->removeDefinition($this->prefix('transformer.fallback'));
 			$builder->removeDefinition($this->prefix('transformer.json'));
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig['debug']])
+				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig['debug']])
+				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 				->setAutowired(false);
 		}
@@ -129,8 +134,9 @@ class NegotiationPlugin extends AbstractPlugin
 		$definitions = Helpers::sortByPriorityInTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, $definitions);
 
 		// Setup negotiators
-		$builder->getDefinition($this->prefix('negotiation'))
-			->setArguments([$definitions]);
+		$negotiationDefinition = $builder->getDefinition($this->prefix('negotiation'));
+		assert($negotiationDefinition instanceof ServiceDefinition);
+		$negotiationDefinition->setArguments([$definitions]);
 	}
 
 	protected function compileTransformers(): void
@@ -160,16 +166,19 @@ class NegotiationPlugin extends AbstractPlugin
 		}
 
 		// Obtain suffix negotiator
-		$suffixNegotiator = $builder->getDefinition($this->prefix('negotiator.suffix'));
-		$suffixNegotiator->setArguments([$transformers['suffix']]);
+		$suffixNegotiatorDefinition = $builder->getDefinition($this->prefix('negotiator.suffix'));
+		assert($suffixNegotiatorDefinition instanceof ServiceDefinition);
+		$suffixNegotiatorDefinition->setArguments([$transformers['suffix']]);
 
 		// Obtain default negotiator
-		$defaultNegotiator = $builder->getDefinition($this->prefix('negotiator.default'));
-		$defaultNegotiator->setArguments([$transformers['suffix']]);
+		$defaultNegotiatorDefinition = $builder->getDefinition($this->prefix('negotiator.default'));
+		assert($defaultNegotiatorDefinition instanceof ServiceDefinition);
+		$defaultNegotiatorDefinition->setArguments([$transformers['suffix']]);
 
 		// Obtain fallback negotiator
-		$fallbackNegotiator = $builder->getDefinition($this->prefix('negotiator.fallback'));
-		$fallbackNegotiator->setArguments([$transformers['fallback']]);
+		$fallbackNegotiatorDefinition = $builder->getDefinition($this->prefix('negotiator.fallback'));
+		assert($fallbackNegotiatorDefinition instanceof ServiceDefinition);
+		$fallbackNegotiatorDefinition->setArguments([$transformers['fallback']]);
 	}
 
 }
