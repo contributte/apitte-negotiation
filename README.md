@@ -16,14 +16,6 @@ Transform response entity into response with unified format in dependence on `Ac
 
 [![Join the chat](https://img.shields.io/gitter/room/apitte/apitte.svg?style=flat-square)](http://bit.ly/apittegitter)
 
-## Version
-
-| State       | Version      | Branch   | PHP      | Composer                                        |
-|-------------|--------------|----------|----------|-------------------------------------------------|
-| development | `^0.6.0`     | `master` | `>= 7.1` | `minimum-stability: dev`, `prefer-stable: true` |
-| stable      | `^0.5.0`     | `master` | `>= 7.1` |                                                 |
-| stable      | `^0.3.0`     | `master` | `>= 5.6` |                                                 |
-
 ## Documentation
 
 - [Setup](.docs/README.md#setup)
@@ -32,6 +24,14 @@ Transform response entity into response with unified format in dependence on `Ac
 - [Error handling](.docs/README.md#error-handling)
 - [Negotiators](.docs/README.md#negotiators)
 - [Transformers](.docs/README.md#transformers)
+
+## Version
+
+| State       | Version      | Branch   | PHP      | Composer                                        |
+|-------------|--------------|----------|----------|-------------------------------------------------|
+| development | `^0.6.0`     | `master` | `>= 7.1` | `minimum-stability: dev`, `prefer-stable: true` |
+| stable      | `^0.5.0`     | `master` | `>= 7.1` |                                                 |
+| stable      | `^0.3.0`     | `master` | `>= 5.6` |                                                 |
 
 ## Maintainers
 

@@ -4,6 +4,15 @@ Content negotiation for [Apitte](https://github.com/apitte/negotiation).
 
 Transform response entity into response with unified format in dependence on `Accept` header and uri path suffix `/api/v1/users(.json|.xml)`
 
+## Content
+
+- [Setup](#setup)
+- [Response](#response)
+- [Entities](#entities)
+- [Error handling](#error-handling)
+- [Negotiators](#negotiators)
+- [Transformers](#transformers)
+
 ## Setup
 
 First of all, setup [core](https://github.com/apitte/core) package and enable `CoreDecoratorPlugin`.
