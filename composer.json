@@ -21,7 +21,7 @@
     "apitte/core": "^0.6.0"
   },
   "require-dev": {
-    "nette/di": "~2.4.13",
+    "nette/di": "~3.0.0",
     "ninjify/nunjuck": "^0.2.0",
     "ninjify/qa": "^0.8.0",
     "phpstan/extension-installer": "^1.0",
@@ -35,9 +35,6 @@
       "Apitte\\Negotiation\\": "src"
     }
   },
-  "conflict": {
-    "nette/di": "<2.4.13"
-  },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config": {
@@ -45,7 +42,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.6.x-dev"
+      "dev-master": "0.7.x-dev"
     }
   }
 }
