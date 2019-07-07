@@ -18,7 +18,7 @@
   ],
   "require": {
     "php": "^7.2",
-    "apitte/core": "^0.6.0"
+    "apitte/core": "^0.7.0"
   },
   "require-dev": {
     "nette/di": "~3.0.0",
