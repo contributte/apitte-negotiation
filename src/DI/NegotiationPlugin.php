@@ -5,6 +5,7 @@ namespace Apitte\Negotiation\DI;
 use Apitte\Core\DI\ApiExtension;
 use Apitte\Core\DI\Helpers;
 use Apitte\Core\DI\Plugin\CoreDecoratorPlugin;
+use Apitte\Core\DI\Plugin\CoreServicesPlugin;
 use Apitte\Core\DI\Plugin\Plugin;
 use Apitte\Core\Exception\Logical\InvalidStateException;
 use Apitte\Negotiation\ContentNegotiation;
@@ -52,29 +53,24 @@ class NegotiationPlugin extends Plugin
 
 		$builder = $this->getContainerBuilder();
 		$config = $this->config;
-		$globalConfig = $this->compiler->getExtension()->getConfig();
 
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.csv'))
 			->setFactory(CsvTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
 			->setFactory(RendererTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
 			->setAutowired(false);
 
@@ -93,8 +89,13 @@ class NegotiationPlugin extends Plugin
 			->setFactory(FallbackNegotiator::class)
 			->addTag(ApiExtension::NEGOTIATION_NEGOTIATOR_TAG, ['priority' => 300]);
 
+		// Use default converter only as a fallback
+		$errorConverterPrefix = $this->prefix(CoreServicesPlugin::getName() . '.errorConverter');
+		$builder->getDefinition($errorConverterPrefix)
+			->setAutowired(false);
+
 		$builder->addDefinition($this->prefix('decorator.response'))
-			->setFactory(ResponseEntityDecorator::class)
+			->setFactory(ResponseEntityDecorator::class, [1 => $errorConverterPrefix])
 			->addTag(ApiExtension::CORE_DECORATOR_TAG, ['priority' => 500]);
 
 		if ($config->unification) {
@@ -103,12 +104,10 @@ class NegotiationPlugin extends Plugin
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 				->setAutowired(false);
 		}
