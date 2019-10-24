@@ -9,9 +9,6 @@ use Apitte\Negotiation\Http\AbstractEntity;
 abstract class AbstractTransformer implements ITransformer
 {
 
-	/** @var bool */
-	protected $debug = false;
-
 	protected function getEntity(ApiResponse $response): AbstractEntity
 	{
 		$entity = $response->getEntity();
@@ -20,11 +17,6 @@ abstract class AbstractTransformer implements ITransformer
 		}
 
 		return $entity;
-	}
-
-	public function setDebugMode(bool $debug): void
-	{
-		$this->debug = $debug;
 	}
 
 }

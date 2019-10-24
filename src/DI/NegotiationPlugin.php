@@ -52,29 +52,24 @@ class NegotiationPlugin extends Plugin
 
 		$builder = $this->getContainerBuilder();
 		$config = $this->config;
-		$globalConfig = $this->compiler->getExtension()->getConfig();
 
 		$builder->addDefinition($this->prefix('transformer.json'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.csv'))
 			->setFactory(CsvTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'csv'])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.fallback'))
 			->setFactory(JsonTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 			->setAutowired(false);
 
 		$builder->addDefinition($this->prefix('transformer.renderer'))
 			->setFactory(RendererTransformer::class)
-			->addSetup('setDebugMode', [$globalConfig->debug])
 			->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '#'])
 			->setAutowired(false);
 
@@ -103,12 +98,10 @@ class NegotiationPlugin extends Plugin
 
 			$builder->addDefinition($this->prefix('transformer.fallback'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => '*', 'fallback' => true])
 				->setAutowired(false);
 			$builder->addDefinition($this->prefix('transformer.json'))
 				->setFactory(JsonUnifyTransformer::class)
-				->addSetup('setDebugMode', [$globalConfig->debug])
 				->addTag(ApiExtension::NEGOTIATION_TRANSFORMER_TAG, ['suffix' => 'json'])
 				->setAutowired(false);
 		}
