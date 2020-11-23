@@ -29,7 +29,7 @@ Transform response entity into response with unified format in dependence on `Ac
 
 | State       | Version | Branch   | Nette | PHP     |
 |-------------|---------|----------|-------|---------|
-| dev         | `^0.7`  | `master` | 3.0+  | `^7.2`  |
+| dev         | `^0.7`  | `master` | 3.0+  | `>=7.2` |
 | stable      | `^0.6`  | `master` | 3.0+  | `^7.2`  |
 | stable      | `^0.5`  | `master` | 2.4   | `>=7.1` |
 | stable      | `^0.3`  | `master` | 2.4   | `>=5.6` |
@@ -46,19 +46,12 @@ Transform response entity into response with unified format in dependence on `Ac
         </br>
         <a href="https://github.com/f3l1x">Milan Felix Šulc</a>
       </td>
-      <td align="center">
-        <a href="https://github.com/mabar">
-            <img width="150" height="150" src="https://avatars0.githubusercontent.com/u/20974277?s=150&v=4">
-        </a>
-        </br>
-        <a href="https://github.com/mabar">Marek Bartoš</a>
-      </td>
     </tr>
   </tbody>
 </table>
 
 ## Sponsoring
 
-<a href="https://github.com/tlapnet"><img  width="200" src="https://cdn.rawgit.com/f3l1x/xsource/2463efb7/assets/tlapdev.png"></a>
+<a href="https://github.com/tlapnet"><img  width="200" src="https://avatars.githubusercontent.com/tlapnet"></a>
 
 The development is sponsored by [Tlapnet](https://www.tlapnet.cz)
