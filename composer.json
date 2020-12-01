@@ -18,7 +18,7 @@
   ],
   "require": {
     "php": ">=7.2",
-    "apitte/core": "^0.7.0"
+    "apitte/core": "~0.7"
   },
   "require-dev": {
     "nette/di": "~3.0.0",
@@ -42,7 +42,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.7.x-dev"
+      "dev-master": "0.8.x-dev"
     }
   }
 }
