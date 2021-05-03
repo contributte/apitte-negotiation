@@ -23,9 +23,9 @@ Install and register negotiation plugin
 composer require apitte/negotiation
 ```
 
-```yaml
+```neon
 api:
-    plugins: 
+    plugins:
         Apitte\Negotiation\DI\NegotiationPlugin:
 ```
 
@@ -121,9 +121,9 @@ Transformers convert entities and exceptions into response.
 
   - transform into json with unified format
 
-```yaml
+```neon
 api:
-    plugins: 
+    plugins:
         Apitte\Negotiation\DI\NegotiationPlugin:
             unification: true
 ```
@@ -135,7 +135,7 @@ api:
 
 #### Implementing transformer
 
-```yaml
+```neon
 services:
     - factory: App\Api\Transformer\XmlTransformer
       tags: [apitte.negotiator.transformer: [suffix: xml, fallback: true]]
@@ -171,7 +171,7 @@ class XmlTransformer extends AbstractTransformer
 
         return $this->transformResponse($request, $response);
     }
-    
+
     protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
     {
         $data = $this->getEntity($response)->getData();
@@ -181,7 +181,7 @@ class XmlTransformer extends AbstractTransformer
         return $response
             ->withHeader('Content-Type', 'application/xml');
     }
-    
+
     protected function transformError(Throwable $error, ApiRequest $request, ApiResponse $response): ApiResponse
     {
     	if ($error instanceof ApiException) {
