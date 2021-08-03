@@ -20,7 +20,7 @@ Website ðŸš€ <a href="https://contributte.org">contributte.org</a> | Contact ðŸ‘
 
 ## Usage
 
-To install the latest version of `apitte/negotiation` use [Composer](https://getcomposer.com).
+To install the latest version of `apitte/negotiation` use [Composer](https://getcomposer.org).
 
 ```bash
 composer require apitte/negotiation
