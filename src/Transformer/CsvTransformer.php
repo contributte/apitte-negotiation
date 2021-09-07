@@ -5,6 +5,7 @@ namespace Apitte\Negotiation\Transformer;
 use Apitte\Core\Exception\ApiException;
 use Apitte\Core\Http\ApiRequest;
 use Apitte\Core\Http\ApiResponse;
+use RuntimeException;
 
 class CsvTransformer extends AbstractTransformer
 {
@@ -50,14 +51,21 @@ class CsvTransformer extends AbstractTransformer
 	private function convert(array $rows, string $delimiter = ',', string $enclosure = '"'): string
 	{
 		$fp = fopen('php://temp', 'r+');
+
+		if ($fp === false) {
+			throw new RuntimeException('IO exception');
+		}
+
 		foreach ($rows as $row) {
 			foreach ($row as $item) {
 				if (is_array($item) || !is_scalar($item)) {
 					return 'CSV need flat array';
 				}
 			}
+
 			fputcsv($fp, $row, $delimiter, $enclosure);
 		}
+
 		rewind($fp);
 		$data = fread($fp, 1048576);
 		fclose($fp);

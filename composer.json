@@ -21,14 +21,13 @@
     "apitte/core": "~0.7 || ~0.8"
   },
   "require-dev": {
-    "nette/di": "~3.0.0",
-    "ninjify/nunjuck": "^0.4.0",
-    "ninjify/qa": "^0.8.0",
-    "phpstan/extension-installer": "^1.0",
-    "phpstan/phpstan-deprecation-rules": "^0.11",
-    "phpstan/phpstan-nette": "^0.11",
-    "phpstan/phpstan-shim": "^0.11",
-    "phpstan/phpstan-strict-rules": "^0.11"
+    "nette/di": "^3.0.0",
+    "ninjify/nunjuck": "^0.4",
+    "ninjify/qa": "^0.12",
+    "phpstan/phpstan": "^0.12",
+    "phpstan/phpstan-deprecation-rules": "^0.12",
+    "phpstan/phpstan-nette": "^0.12",
+    "phpstan/phpstan-strict-rules": "^0.12"
   },
   "autoload": {
     "psr-4": {

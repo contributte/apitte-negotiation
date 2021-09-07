@@ -6,6 +6,10 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 
+/**
+ * @template TKey of string|int
+ * @implements IteratorAggregate<TKey, mixed>
+ */
 class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 {
 
@@ -34,6 +38,9 @@ class ArrayEntity extends AbstractEntity implements IteratorAggregate, Countable
 		return (array) $this->getData();
 	}
 
+	/**
+	 * @return ArrayIterator<TKey, mixed>
+	 */
 	public function getIterator(): ArrayIterator
 	{
 		return new ArrayIterator($this->toArray());
