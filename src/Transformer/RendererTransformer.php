@@ -29,7 +29,9 @@ class RendererTransformer extends AbstractTransformer
 		if (!isset($context['renderer'])) return $response;
 
 		// Fetch service
-		$service = $this->container->getByType($context['renderer'], false);
+		/** @var class-string $renderer */
+		$renderer = $context['renderer'];
+		$service = $this->container->getByType($renderer, false);
 
 		if (!$service) {
 			throw new InvalidStateException(sprintf('Renderer "%s" is not registered in container', $context['renderer']));
