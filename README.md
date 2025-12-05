@@ -1,22 +1,25 @@
-![](https://heatbadger.now.sh/github/readme/contributte/apitte-negotiation/)
+![](https://heatbadger.now.sh/github/readme/contributte/apitte-negotiation/?deprecated=1)
 
 <p align=center>
-  <a href="https://github.com/apitte/negotiation/actions"><img src="https://badgen.net/github/checks/apitte/negotiation/master?cache=300"></a>
-  <a href="https://coveralls.io/r/apitte/negotiation"> <img src="https://badgen.net/coveralls/c/github/apitte/negotiation?cache=300"> </a>
-  <a href="https://packagist.org/packages/apitte/negotiation"> <img src="https://badgen.net/packagist/dm/apitte/negotiation"> </a>
-  <a href="https://packagist.org/packages/apitte/negotiation"> <img src="https://badgen.net/packagist/v/apitte/negotiation"> </a>
+    <a href="https://bit.ly/ctteg"><img src="https://badgen.net/badge/support/gitter/cyan"></a>
+    <a href="https://bit.ly/cttfo"><img src="https://badgen.net/badge/support/forum/yellow"></a>
+    <a href="https://contributte.org/partners.html"><img src="https://badgen.net/badge/sponsor/donations/F96854"></a>
 </p>
-<p align=center>
-  <a href="https://packagist.org/packages/apitte/negotiation"><img src="https://badgen.net/packagist/php/apitte/negotiation"></a>
-  <a href="https://github.com/contributte/apitte-negotiation"><img src="https://badgen.net/github/license/contributte/apitte-negotiation"></a>
-  <a href="https://bit.ly/ctteg"><img src="https://badgen.net/badge/support/gitter/cyan"></a>
-  <a href="https://bit.ly/cttfo"><img src="https://badgen.net/badge/support/forum/yellow"></a>
-  <a href="https://contributte.org/partners.html"><img src="https://badgen.net/badge/become/a%20patron/F96854"></a>
-<p>
 
 <p align=center>
-Website 🚀 <a href="https://contributte.org">contributte.org</a> | Contact 👨🏻‍💻 <a href="https://f3l1x.io">f3l1x.io</a> | Twitter 🐦 <a href="https://twitter.com/contributte">@contributte</a>
+    Website 🚀 <a href="https://contributte.org">contributte.org</a> | Contact 👨🏻‍💻 <a href="https://f3l1x.io">f3l1x.io</a> | Twitter 🐦 <a href="https://twitter.com/contributte">@contributte</a>
 </p>
+
+## Disclaimer
+
+| :warning: | This project is no longer being maintained. Please use [contributte/apitte](https://github.com/contributte/apitte).|
+|---|---|
+
+| Composer | [`apitte/negotiation`](https://packagist.org/apitte/negotiation) |
+|---| --- |
+| Version | ![](https://badgen.net/packagist/v/apitte/negotiation) |
+| PHP | ![](https://badgen.net/packagist/php/apitte/negotiation) |
+| License | ![](https://badgen.net/github/license/contributte/apitte-negotiation) |
 
 ## Usage
 
@@ -28,7 +31,199 @@ composer require apitte/negotiation
 
 ## Documentation
 
-For details on how to use this package, check out our [documentation](.docs).
+Content negotiation for [Apitte](https://github.com/apitte/negotiation).
+
+Transform response entity into response with unified format in dependence on `Accept` header and uri path suffix `/api/v1/users(.json|.xml)`
+
+### Setup
+
+First of all, setup [core](https://github.com/apitte/core) package and enable `CoreDecoratorPlugin`.
+
+Install and register negotiation plugin
+
+```bash
+composer require apitte/negotiation
+```
+
+```neon
+api:
+    plugins:
+        Apitte\Negotiation\DI\NegotiationPlugin:
+```
+
+### Response
+
+Instead of writing data into response body use `$response->withEntity($entity)` so transformers could handle transformation for you.
+
+```php
+namespace App\Api\V1\Controllers;
+
+use Apitte\Core\Annotation\Controller\ControllerPath;
+use Apitte\Core\Annotation\Controller\Method;
+use Apitte\Core\Annotation\Controller\Path;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Negotiation\Http\ArrayEntity;
+
+/**
+ * @ControllerPath("/users")
+ */
+class UsersController extends BaseV1Controller
+{
+
+    /**
+     * @Path("/")
+     * @Method("GET")
+     */
+    public function index(ApiRequest $request, ApiResponse $response): ApiResponse
+    {
+        $entity = ArrayEntity::from([
+            [
+                'id' => 1,
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'emailAddress' => 'john@doe.com',
+            ],
+            [
+                'id' => 2,
+                'firstName' => 'Elon',
+                'lastName' => 'Musk',
+                'emailAddress' => 'elon.musk@spacex.com',
+            ],
+        ]);
+
+        return $response
+            ->withStatus(ApiResponse::S200_OK)
+            ->withEntity($entity);
+    }
+
+}
+```
+
+### Entities
+
+Value objects which are used to create response
+
+- `ArrayEntity` - create from array
+- `ObjectEntity` - create from stdClass
+- `ScalarEntity` - create from raw data
+
+### Error handling
+
+Negotiations are implemented through an `IErrorDecorator`, which have higher priority than internal `ErrorHandler`
+so response is created from exception in an `ITransformer` and `ErrorHandler` only log that exception (if you use `PsrLogErrorHandler`)
+
+### Negotiators
+
+Handle request and based on path suffix or request headers call appropriate transformer.
+
+`SuffixNegotiator`
+
+- used for request with path suffix like `/api/v1/users.json` -> transformer for `json` suffix is used
+
+`DefaultNegotiator`
+
+- called when none other transform
+- require annotation `@Negotiation(default = true, suffix = "json")` defined on endpoint - transformer for given suffix is looked for
+
+`FallbackNegotiator`
+
+- used last if no other negotiator transformed response
+- uses json transformer by default
+
+### Transformers
+
+Transformers convert entities and exceptions into response.
+
+`JsonTransformer`
+
+  - transform into json
+
+`JsonUnifyTransformer`
+
+  - transform into json with unified format
+
+```neon
+api:
+    plugins:
+        Apitte\Negotiation\DI\NegotiationPlugin:
+            unification: true
+```
+
+`CsvTransformer`
+
+  - transform into csv
+  - known limitation: data need to be a flat structure
+
+#### Implementing transformer
+
+```neon
+services:
+    - factory: App\Api\Transformer\XmlTransformer
+      tags: [apitte.negotiator.transformer: [suffix: xml, fallback: true]]
+```
+
+- register transformer for suffix `xml`, used for uris like `/api/v1/users.xml`
+- if `fallback: true` is defined and none of transformers matched then use that transformer
+
+```php
+namespace App\Api\Transformer;
+
+use Apitte\Core\Exception\ApiException;
+use Apitte\Core\Http\ApiRequest;
+use Apitte\Core\Http\ApiResponse;
+use Apitte\Core\Http\ResponseAttributes;
+use Apitte\Negotiation\Http\ArrayEntity;
+use Apitte\Negotiation\Transformer\AbstractTransformer;
+use Throwable;
+
+class XmlTransformer extends AbstractTransformer
+{
+
+    /**
+     * Encode given data for response
+     *
+     * @param mixed[] $context
+     */
+    public function transform(ApiRequest $request, ApiResponse $response, array $context = []) : ApiResponse
+    {
+        if (isset($context['exception'])) {
+            return $this->transformError($context['exception'], $request, $response);
+        }
+
+        return $this->transformResponse($request, $response);
+    }
+
+    protected function transformResponse(ApiRequest $request, ApiResponse $response): ApiResponse
+    {
+        $data = $this->getEntity($response)->getData();
+        $content = $this->dataToXmlString($data);
+        $response->getBody()->write($content);
+
+        return $response
+            ->withHeader('Content-Type', 'application/xml');
+    }
+
+    protected function transformError(Throwable $error, ApiRequest $request, ApiResponse $response): ApiResponse
+    {
+    	if ($error instanceof ApiException) {
+    		$code = $error->getCode();
+    		$message = $error->getMessage();
+    	} else {
+    		$code = 500;
+    		$message = 'Application encountered an internal error. Please try again later.';
+    	}
+
+        return $response
+            ->withStatus($code)
+            ->withAttribute(ResponseAttributes::ATTR_ENTITY, ArrayEntity::from([
+                'status' => 'error',
+                'message' => $message,
+            ]));
+    }
+
+}
+```
 
 ## Version
 
@@ -39,9 +234,7 @@ For details on how to use this package, check out our [documentation](.docs).
 
 ## Development
 
-See [how to contribute](https://contributte.org/contributing.html) to this package.
-
-This package is currently maintaining by these authors.
+This package was maintain by these authors.
 
 <a href="https://github.com/f3l1x">
   <img width="80" height="80" src="https://avatars2.githubusercontent.com/u/538058?v=3&s=80">
@@ -50,4 +243,4 @@ This package is currently maintaining by these authors.
 -----
 
 Consider to [support](https://contributte.org/partners.html) **contributte** development team.
-Also thank you for using this package.
+Also thank you for being used this package.
