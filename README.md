@@ -14,8 +14,7 @@
 
 | :warning: | This project is no longer being maintained. Please use [contributte/apitte](https://github.com/contributte/apitte).|
 |---|---|
-
-| Composer | [`apitte/negotiation`](https://packagist.org/apitte/negotiation) |
+| Composer | [`apitte/negotiation`](https://packagist.org/packages/apitte/negotiation) |
 |---| --- |
 | Version | ![](https://badgen.net/packagist/v/apitte/negotiation) |
 | PHP | ![](https://badgen.net/packagist/php/apitte/negotiation) |
@@ -234,7 +233,7 @@ class XmlTransformer extends AbstractTransformer
 
 ## Development
 
-This package was maintain by these authors.
+This package was maintained by these authors.
 
 <a href="https://github.com/f3l1x">
   <img width="80" height="80" src="https://avatars2.githubusercontent.com/u/538058?v=3&s=80">
