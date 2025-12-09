@@ -15,7 +15,6 @@
 | :warning: | This project is no longer being maintained. Please use [contributte/apitte](https://github.com/contributte/apitte).|
 |---|---|
 | Composer | [`apitte/negotiation`](https://packagist.org/packages/apitte/negotiation) |
-|---| --- |
 | Version | ![](https://badgen.net/packagist/v/apitte/negotiation) |
 | PHP | ![](https://badgen.net/packagist/php/apitte/negotiation) |
 | License | ![](https://badgen.net/github/license/contributte/apitte-negotiation) |
