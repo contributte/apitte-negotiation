@@ -14,7 +14,6 @@
 
 | :warning: | This project is no longer being maintained. Please use [contributte/apitte](https://github.com/contributte/apitte).|
 |---|---|
-
 | Composer | [`apitte/negotiation`](https://packagist.org/packages/apitte/negotiation) |
 |---| --- |
 | Version | ![](https://badgen.net/packagist/v/apitte/negotiation) |
@@ -243,4 +242,4 @@ This package was maintained by these authors.
 -----
 
 Consider to [support](https://contributte.org/partners.html) **contributte** development team.
-Also thank you for using this package.
+Also thank you for being used this package.
